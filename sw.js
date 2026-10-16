@@ -1,6 +1,6 @@
 // Qui est-ce ? – Jan Wilsker-Wiesen. Garde le jeu en mémoire pour jouer sans Internet.
 // Après une modification du jeu, augmenter le numéro de version.
-const VERSION = 'qui-est-ce-v1';
+const VERSION = 'qui-est-ce-v4';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', e => {

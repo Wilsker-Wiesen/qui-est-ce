@@ -67,6 +67,10 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .coderow label{font-weight:800}
 #codeInput{font-family:var(--display);font-size:28px;font-weight:800;width:5.2em;text-align:center;letter-spacing:4px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:4px 8px;font-variant-numeric:tabular-nums}
+.flag{flex:none;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:800;font-size:14px;line-height:1.2;white-space:nowrap}
+.flag:hover{border-color:var(--board)}
+.herotop,.modehead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.herotop h1{min-width:0}
 .src{font-size:13px;color:var(--muted);margin:14px 0 0}
 .credit{font-size:14px;color:var(--muted);margin:6px 0 0;padding-top:10px;border-top:2px dashed var(--line);max-width:34em}
 .credit b{color:var(--ink);font-family:var(--display);font-size:16px}
@@ -105,6 +109,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .chip{border:2px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 11px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px}
 .chip.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 .chip i{font-style:normal;font-weight:600;opacity:.6}
+.ico{width:22px;height:22px;flex:none;margin:-3px 0 -3px -3px}
+.gw{display:inline-flex;align-items:center;gap:6px}
 .sw{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,.35);display:inline-block}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tab{flex:1 1 auto;border:2px solid var(--line);background:var(--chip);border-radius:12px;padding:8px 6px;font-weight:800;font-size:14px}
@@ -201,7 +207,7 @@ const COLORS={
 const CK=Object.keys(COLORS);
 const HAIR={brun:{hex:'#7a4a2a',f:'bruns'},blond:{hex:'#ecc15e',f:'blonds'},roux:{hex:'#cf5a26',f:'roux'},noir:{hex:'#26222a',f:'noirs'}};
 const LEN={long:'longs',court:'courts'};
-const EYES={bleu:{hex:'#3d7fd1',f:'bleus'},vert:{hex:'#3f9a59',f:'verts'},marron:{hex:'#6b4126',f:'marron'}};
+const EYES={bleu:{hex:'#2b7de9',f:'bleus'},vert:{hex:'#26a646',f:'verts'},marron:{hex:'#8a5426',f:'marron'}};
 const ITEMS={
   'casquette':{g:'f',de:'Mütze, Kappe',slot:'head',extra:true},
   'lunettes':{g:'f',pl:true,de:'Brille',slot:'glasses'},
@@ -221,6 +227,27 @@ const ITEMS={
   'chaussettes':{g:'f',pl:true,de:'Socken',slot:'socks',extra:true},
   'chaussures':{g:'f',pl:true,de:'Schuhe',slot:'shoes'}
 };
+// petites icônes (24×24) : on voit tout de suite la différence entre chemise et chemisier, pantalon et jean, etc.
+const ICO={
+  'casquette':'<path d="M4,15 Q4,6 12,6 Q20,6 20,15 Z"/><path d="M12,6 L12,15" fill="none"/><path d="M3,15 L22,15 Q23,17.5 20,17.5 L3,17.5 Q1.8,16.2 3,15 Z"/>',
+  'lunettes':'<circle cx="7" cy="13" r="4.2"/><circle cx="17" cy="13" r="4.2"/><path d="M11.2,12.4 Q12,11.4 12.8,12.4 M2.8,12 L1,10 M21.2,12 L23,10" fill="none"/>',
+  't-shirt':'<path d="M8.5,4 L15.5,4 L21,7.5 L19,11.5 L17,10.5 L17,21 L7,21 L7,10.5 L5,11.5 L3,7.5 Z"/><path d="M9.5,4 Q12,7 14.5,4" fill="none"/>',
+  'chemise':'<path d="M8,3 L16,3 L20,5 L22.5,17 L19.5,17.5 L17.5,10 L17.5,21 L6.5,21 L6.5,10 L4.5,17.5 L1.5,17 L4,5 Z"/><path d="M9.3,3 L11,8.5 L12,6.8 L13,8.5 L14.7,3" fill="none"/><path d="M12,8.5 L12,21" fill="none"/><circle cx="12" cy="11.5" r=".5"/><circle cx="12" cy="15" r=".5"/><circle cx="12" cy="18.5" r=".5"/><rect x="13.8" y="10" width="2.4" height="2.4" fill="none"/>',
+  'chemisier':'<path d="M8,3 L16,3 L20,5 L22.5,17 L19.5,17.5 L17.5,10 L17.5,21 L6.5,21 L6.5,10 L4.5,17.5 L1.5,17 L4,5 Z"/><path d="M8.6,3.4 Q9.5,7.6 12,6.4 Q14.5,7.6 15.4,3.4" fill="none"/><path d="M12,7.6 L9.6,6.2 L9.6,9 Z M12,7.6 L14.4,6.2 L14.4,9 Z"/><circle cx="12" cy="13" r=".5"/><circle cx="12" cy="16.5" r=".5"/>',
+  'pull':'<path d="M8,3 L16,3 L20,5 L22.5,17 L19.5,17.5 L17.5,10 L17.5,21 L6.5,21 L6.5,10 L4.5,17.5 L1.5,17 L4,5 Z"/><path d="M9,3 Q12,6.5 15,3 M6.5,18.5 L17.5,18.5 M8,11.5 l2,2 l2,-2 l2,2 l2,-2" fill="none"/>',
+  'sweat-shirt':'<path d="M8,4 L16,4 L20,6 L22.5,17 L19.5,17.5 L17.5,11 L17.5,21 L6.5,21 L6.5,11 L4.5,17.5 L1.5,17 L4,6 Z"/><path d="M7.5,4.5 Q12,-0.5 16.5,4.5 Q12,8 7.5,4.5 Z"/><path d="M9,15 L15,15 L16,20 L8,20 Z M10.6,6.6 L10.4,10 M13.4,6.6 L13.6,10" fill="none"/>',
+  'veste':'<path d="M8,3 L16,3 L20,5 L22.5,17 L19.5,17.5 L17.5,10 L17.5,21 L6.5,21 L6.5,10 L4.5,17.5 L1.5,17 L4,5 Z"/><path d="M10,3 L8.6,9.5 L11,11.5 M14,3 L15.4,9.5 L13,11.5 M12,11.5 L12,21" fill="none"/><circle cx="10.6" cy="15" r=".6"/><circle cx="10.6" cy="18.3" r=".6"/>',
+  'anorak':'<path d="M7.5,4 L16.5,4 L20.5,6 L23,17.5 L19.5,18 L18,11 L18,21.5 L6,21.5 L6,11 L4.5,18 L1,17.5 L3.5,6 Z"/><path d="M8.5,1.6 L15.5,1.6 L16,5 L8,5 Z"/><path d="M6,10 Q12,11.4 18,10 M6,14 Q12,15.4 18,14 M6,18 Q12,19.4 18,18 M12,5 L12,21.5" fill="none"/>',
+  'robe':'<path d="M9,2.5 L15,2.5 L16,8.5 L20,21 L4,21 L8,8.5 Z"/><path d="M10,2.5 Q12,5.5 14,2.5 M8,8.5 L16,8.5" fill="none"/>',
+  'pantalon':'<path d="M6,3 L18,3 L18.6,21 L13.6,21 L12,9 L10.4,21 L5.4,21 Z"/><path d="M6,5.6 L18,5.6" fill="none"/>',
+  'pantalon baggy':'<path d="M5,3 L19,3 L21.6,21 L13.8,21 L12,10 L10.2,21 L2.4,21 Z"/><path d="M5,5.6 L19,5.6 M5.4,12 Q7,14 5.2,16 M18.6,12 Q17,14 18.8,16" fill="none"/>',
+  'jean':'<path d="M6,3 L18,3 L18.6,21 L13.6,21 L12,9 L10.4,21 L5.4,21 Z"/><path d="M6,5.6 L18,5.6 M7,5.6 Q8.6,8.8 10.6,5.6 M17,5.6 Q15.4,8.8 13.4,5.6" fill="none"/><path d="M8,10 L7.6,20 M16,10 L16.4,20" fill="none" stroke-dasharray="1.3 1.1"/>',
+  'jupe':'<path d="M7,4 L17,4 L20.5,20 L3.5,20 Z"/><path d="M7,6.6 L17,6.6 M10,6.6 L8.6,20 M14,6.6 L15.4,20" fill="none"/>',
+  'short':'<path d="M6,5 L18,5 L19.2,16 L13.4,16 L12,10.5 L10.6,16 L4.8,16 Z"/><path d="M6,7.6 L18,7.6" fill="none"/>',
+  'chaussettes':'<path d="M8.5,2 L15,2 L15,13 L19.5,16 Q21.6,18.2 19.6,20.6 L11.5,20.6 Q8.5,20.6 8.5,17 Z"/><path d="M8.5,5 L15,5 M8.5,9 L15,9" fill="none"/>',
+  'chaussures':'<path d="M1.5,18 L1.5,11 Q1.5,9 3.5,9 L8.5,9 L11.5,12.2 L18.5,14 Q22.5,15 22.5,18 L22.5,19 L1.5,19 Z"/><path d="M1.5,17 L22.5,17 M7.5,11 L9.5,10.4 M8.6,12.6 L10.6,12" fill="none"/>'
+};
+const icon=k=>`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">${ICO[k]}</svg>`;
 const NAMES_M=['Hugo','Lucas','Théo','Nathan','Louis','Jules','Tom','Hakim','Malik','Enzo','Léo','Paul','Noah','Gabriel','Yanis','Adam'];
 const NAMES_F=['Lola','Zoé','Léa','Chloé','Manon','Camille','Inès','Ada','Emma','Jade','Louise','Alice','Sarah','Lina','Clara','Yasmine'];
 const SKIN=['#f7d6b8','#eab88d','#cf9567','#a06842','#6e452b'];
@@ -258,8 +285,9 @@ function generate(code){
       people.push({name:names[i],g,len:lens[i],topT,bottomT:topT==='robe'?null:bottoms[bi++],glasses:glasses[i],cap:caps[i]});
     }
   }
-  const hairs=bag(r,[['brun',7],['noir',7],['blond',6],['roux',4]]);
-  const eyes=bag(r,[['marron',9],['bleu',8],['vert',7]]);
+  // chaque couleur de cheveux existe en long ET en court ; chaque couleur d'yeux chez les garçons ET les filles
+  const hairBags={long:bag(r,[['brun',4],['noir',3],['blond',3],['roux',2]]),court:bag(r,[['brun',3],['noir',4],['blond',3],['roux',2]])};
+  const eyeBags={m:bag(r,[['marron',4],['bleu',4],['vert',4]]),f:bag(r,[['marron',4],['bleu',4],['vert',4]])};
   const bare=people.filter(p=>!p.bottomT||p.bottomT==='jupe'||p.bottomT==='short');
   const sockSet=new Set(shuffle(r,bare).slice(0,Math.min(6,bare.length)));
   const seen=new Set();
@@ -267,7 +295,7 @@ function generate(code){
     const top={type:p.topT,color:deck()};
     let bottom=null;
     if(p.bottomT){bottom={type:p.bottomT,color:p.bottomT==='jean'?pick(r,['bleu','bleu','bleu','noir','gris']):deck([top.color])}}
-    const c={name:p.name,g:p.g,skin:pick(r,SKIN),hair:{len:p.len,color:hairs[i]},eyes:eyes[i],
+    const c={name:p.name,g:p.g,skin:pick(r,SKIN),hair:{len:p.len,color:hairBags[p.len].pop()},eyes:eyeBags[p.g].pop(),
       glasses:p.glasses?{type:'lunettes',color:deck()}:null,head:p.cap?{type:'casquette',color:deck([top.color])}:null,
       top,bottom,socks:sockSet.has(p)?{type:'chaussettes',color:deck(bottom?[bottom.color]:[top.color])}:null,
       shoes:{type:'chaussures',color:deck()},shoeStyle:r()<.6?'basket':'classic'};
@@ -290,7 +318,8 @@ function shoe(x,dir,style,col){
 function figure(c){
   const s=c.skin,hc=HAIR[c.hair.color].hex,top=c.top,tc=COLORS[top.color].hex;
   let o='';
-  if(c.hair.len==='long')o+=`<path d="M36.5,29 Q33,46 33,60 Q41,63 50,62 Q59,63 67,60 Q67,46 63.5,29 Z" fill="${hc}" ${ST}/>`;
+  if(c.hair.len==='long')o+=c.g==='f'?`<path d="M36.5,29 Q33,46 33,60 Q41,63 50,62 Q59,63 67,60 Q67,46 63.5,29 Z" fill="${hc}" ${ST}/>`
+    :`<path d="M36.5,29 Q34.5,40 35.5,48 Q40.5,50 45,47.5 L55,47.5 Q59.5,50 64.5,48 Q65.5,40 63.5,29 Z" fill="${hc}" ${ST}/>`;
   // jambes, chaussettes, bas
   const b=c.bottom;
   const bareLegs=!b||b.type==='jupe'||b.type==='short';
@@ -344,17 +373,27 @@ function figure(c){
   // tête
   o+=`<circle cx="37.5" cy="32" r="3" fill="${s}" ${ST}/><circle cx="62.5" cy="32" r="3" fill="${s}" ${ST}/><circle cx="50" cy="31" r="13" fill="${s}" ${ST}/>`;
   const ec=EYES[c.eyes].hex;
-  for(const x of [45.2,54.8])o+=`<circle cx="${x}" cy="30" r="2.5" fill="#fff" stroke="${INK}" stroke-width=".7"/><circle cx="${x}" cy="30.2" r="1.6" fill="${ec}"/><circle cx="${x}" cy="30.2" r=".7" fill="${INK}"/>`;
-  o+=`<circle cx="42" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/><circle cx="58" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/><path d="M46.5,37.5 Q50,40.5 53.5,37.5" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/>`;
+  for(const x of [45.2,54.8])o+=`<circle cx="${x}" cy="30.5" r="2.9" fill="#fff" stroke="${INK}" stroke-width=".7"/><circle cx="${x}" cy="30.7" r="2.1" fill="${ec}"/><circle cx="${x}" cy="30.7" r=".6" fill="${INK}"/><circle cx="${x+.8}" cy="29.8" r=".45" fill="#fff"/>`;
+  o+=`<circle cx="42" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/><circle cx="58" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/>`;
+  // les filles : cils, lèvres rosées et petites boucles d'oreilles, pour qu'on reconnaisse tout de suite garçon ou fille
+  if(c.g==='f'){
+    o+=`<path d="M42.6,28.6 l-1.5,-1.2 M42.3,29.9 l-1.7,-.4 M57.4,28.6 l1.5,-1.2 M57.7,29.9 l1.7,-.4" stroke="${INK}" stroke-width=".8" stroke-linecap="round"/>`;
+    o+=`<path d="M46.3,37.2 Q50,41.6 53.7,37.2 Q50,38.6 46.3,37.2 Z" fill="#d4566e" stroke="#9e2f45" stroke-width=".6" stroke-linejoin="round"/>`;
+    o+=`<circle cx="36.8" cy="35" r="1.1" fill="#f2c230" stroke="${INK}" stroke-width=".5"/><circle cx="63.2" cy="35" r="1.1" fill="#f2c230" stroke="${INK}" stroke-width=".5"/>`;
+  }else o+=`<path d="M46.5,37.5 Q50,40.5 53.5,37.5" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/><path d="M42.4,26.7 L47.8,26.1 M57.6,26.7 L52.2,26.1" stroke="${shade(hc,-.5)}" stroke-width="1.5" stroke-linecap="round"/>`;
   // lunettes : monture fine, contour sombre très mince pour les couleurs claires
-  if(c.glasses){const g=COLORS[c.glasses.color].hex;
-    o+=`<g fill="none" stroke-linecap="round"><g stroke="${INK}" stroke-width="1.7"><circle cx="45.2" cy="30" r="3.8"/><circle cx="54.8" cy="30" r="3.8"/><path d="M49,29.4 Q50,28.6 51,29.4 M41.4,29.5 L37.8,28.6 M58.6,29.5 L62.2,28.6"/></g><g stroke="${g}" stroke-width="1"><circle cx="45.2" cy="30" r="3.8"/><circle cx="54.8" cy="30" r="3.8"/><path d="M49,29.4 Q50,28.6 51,29.4 M41.4,29.5 L37.8,28.6 M58.6,29.5 L62.2,28.6"/></g></g><circle cx="45.2" cy="30" r="3.3" fill="#fff" fill-opacity=".15"/><circle cx="54.8" cy="30" r="3.3" fill="#fff" fill-opacity=".15"/>`}
-  if(c.hair.len==='court')o+=`<path d="M37.2,31 Q36,17 50,17 Q64,17 62.8,31 Q61,23.5 53,22.5 Q47,25.5 41,24 Q38.5,27 37.2,31 Z" fill="${hc}" ${ST}/>`;
+  if(c.glasses){const g=COLORS[c.glasses.color].hex;const fr=`<circle cx="45.2" cy="30.5" r="4.3"/><circle cx="54.8" cy="30.5" r="4.3"/><path d="M48.9,29.9 Q50,29 51.1,29.9 M40.9,30 L37.8,29 M59.1,30 L62.2,29"/>`;
+    // monture fine et verres transparents : la couleur des yeux reste bien visible
+    const dark=['noir','marron','gris'].includes(c.glasses.color);
+    o+=dark?`<g fill="none" stroke-linecap="round" stroke="${g}" stroke-width="1">${fr}</g>`:`<g fill="none" stroke-linecap="round"><g stroke="${INK}" stroke-width="1.3">${fr}</g><g stroke="${g}" stroke-width=".75">${fr}</g></g>`}
+  if(c.hair.len==='court'){o+=`<path d="M37.2,31 Q36,17 50,17 Q64,17 62.8,31 Q61,23.5 53,22.5 Q47,25.5 41,24 Q38.5,27 37.2,31 Z" fill="${hc}" ${ST}/>`;
+    if(c.g==='f'&&!c.head)o+=`<g transform="rotate(-28 57.5 21.5)"><rect x="54.2" y="20.4" width="6.6" height="2.3" rx="1.1" fill="#e2589b" stroke="${INK}" stroke-width=".7"/><circle cx="57.5" cy="21.55" r=".7" fill="#fff"/></g>`}
   else o+=`<path d="M37.2,32 Q35.5,17 50,17 Q64.5,17 62.8,32 Q62,24 56,21.5 Q50,25 44,21.5 Q38.2,24 37.2,32 Z" fill="${hc}" ${ST}/>`;
   if(c.head){
     const k=COLORS[c.head.color].hex,dk=shade(k,-.22);
-    o+=`<path d="M37.4,26 L37.4,34 L39.6,33 L40,26 Z M62.6,26 L62.6,34 L60.4,33 L60,26 Z" fill="${hc}" ${ST}/>`;
-    o+=`<path d="M36.6,28 Q37,13.5 50,13.5 Q63,13.5 63.4,28 Z" fill="${k}" ${ST}/><path d="M50,14 L50,27" stroke="${dk}" stroke-width=".9"/><circle cx="50" cy="14" r="1.6" fill="${dk}" ${ST}/><path d="M35.5,27.5 Q50,24 64.5,27.5 Q66,31.5 50,31.8 Q34,31.5 35.5,27.5 Z" fill="${dk}" ${ST}/>`;
+    o+=`<path d="M37.4,24 L37.4,34 L39.6,33 L40,24 Z M62.6,24 L62.6,34 L60.4,33 L60,24 Z" fill="${hc}" ${ST}/>`;
+    // la casquette reste au-dessus des sourcils : les yeux restent toujours visibles
+    o+=`<path d="M36.8,24.5 Q37,10.5 50,10.5 Q63,10.5 63.2,24.5 Z" fill="${k}" ${ST}/><path d="M50,11 L50,23.5" stroke="${dk}" stroke-width=".9"/><circle cx="50" cy="11" r="1.6" fill="${dk}" ${ST}/><path d="M35.5,24 Q50,21 64.5,24 Q65.5,26.8 50,27 Q34.5,26.8 35.5,24 Z" fill="${dk}" ${ST}/>`;
   }
   return o;
 }
@@ -450,64 +489,185 @@ function resetBuilder(){Object.assign(B,{item:null,color:null,len:null,hcol:null
 const app=document.getElementById('app');
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
+// ---------------- langue des consignes (les phrases à apprendre restent en français) ----------------
+let L='fr';
+const TXT={
+fr:{
+  flag:'🇩🇪 Deutsch',flagAria:'Auf Deutsch umstellen',
+  lead:`Le jeu de l'<b>Unité 1</b>&#8239;: les vêtements, les couleurs et le look. Pose des questions en français, retourne les cartes et trouve le personnage secret.`,
+  vocabHint:`Dans le jeu, le bouton <b>Vocabulaire</b> montre tous les mots avec la traduction en allemand. Le bouton 🔊 lit la question en français.`,
+  src:`Vocabulaire${NB}: Découvertes 2, Unité 1, Atelier B (livre p.${NB}178–179).`,
+  credit:`Un jeu de <b>Jan Wilsker-Wiesen</b> · créé avec Claude`,
+  duoH:'À deux · 2 iPads',
+  duo1:`Tapez <b>le même code</b> sur les deux iPads. Vous avez alors les mêmes 24 personnages.`,
+  duo2:`Chacun et chacune reçoit un personnage secret.`,
+  duo3:`Posez vos questions <b>à voix haute</b>, chacun à son tour${NB}: ${Q(`Est-ce que ton personnage porte une jupe verte${NB}?`)} Réponse${NB}: ${Q('Non, mon personnage ne porte pas de jupe verte.')}<br>Dites toujours <b>mon personnage</b>, pas <i>il</i> ou <i>elle</i>. Comme ça, on ne sait pas si c'est un garçon ou une fille.`,
+  duo4:`Touche une carte pour la retourner. Le premier ou la première qui trouve le personnage gagne${NB}: ${Q(`Est-ce que c'est Lola${NB}?`)}`,
+  codeLabel:'Code du jeu',startDuo:'Commencer',
+  cpuH:"Contre l'ordinateur",
+  cpuP:`Pour t'entraîner seul ou seule. Tu construis tes questions avec des mots. L'ordinateur te pose aussi des questions et tu choisis la bonne réponse. Attention à <i>ne … pas de</i> et aux couleurs${NB}!`,
+  startCpu:"Commencer l'entraînement",
+  secretTitle:'Ton personnage secret',
+  secretDuo:`Retiens bien ton personnage et ne montre pas ton iPad à ton ou ta partenaire. Tu peux revoir ta carte à droite.`,
+  secretCpu:`L'ordinateur cherche ton personnage. Toi, tu cherches le personnage de l'ordinateur. Tu commences${NB}!`,
+  go:`C'est parti${NB}!`,
+  pillCode:c=>`Code du jeu${NB}: <b>${c}</b>`,pillCpu:"Entraînement contre l'ordinateur",vocabBtn:'Vocabulaire',newGame:'Nouvelle partie',
+  noteGuess:'Touche le personnage que tu veux deviner.',
+  noteTidy:'Touche une carte pour la retourner. Les autres cartes se rapprochent.',
+  noteNormal:'Touche une carte pour la retourner. Touche encore une fois pour la remettre.',
+  tidyShow:n=>`Montrer les cartes retournées (${n})`,tidyHide:'Ranger les cartes retournées',
+  inv:c=>`<b>${c}</b> ne change jamais.`,
+  genre:(f,pl)=>`${f?'féminin':'masculin'} ${pl?'pluriel':'singulier'}`,
+  same:a=>`La couleur reste <b>${a}</b>.`,change:(b,a)=>`<b>${b}</b> devient <b>${a}</b>.`,
+  lblItem:'Le vêtement',lblColor:'La couleur (si tu veux)',lblLen:`Les cheveux${NB}: longs ou courts${NB}?`,lblHcol:`Les cheveux${NB}: la couleur`,lblEyes:`ou${NB}: les yeux`,
+  empty:`Choisis des mots${NB}: ta question apparaît ici.`,listen:'Écouter',
+  logTitle:'Les questions',whoYou:'Toi',whoCpu:'PC',
+  mine:'Mon personnage',cpuMine:"Ton personnage (l'ordinateur cherche)",see:'Voir',hide:'Cacher',
+  hiddenTxt:`Caché${NB}: personne ne regarde${NB}!`,shownTxt:`Dans ta réponse, tu dis${NB}: <b>mon personnage</b>`,
+  zoomHint:"Touche la carte pour l'agrandir.",zoomAria:'Agrandir mon personnage',zoomClose:'Touche pour fermer.',
+  askTitle:'Pose une question',ansShow:`Qu'est-ce que je réponds pour mon personnage${NB}?`,ansHide:'Cacher la réponse',
+  answerBox:'Répondre et deviner',guessLbl:'deviner',standing:'Cartes encore debout',reveal:'Montrer mon personnage',
+  over:'La partie est finie.',again:'Encore une partie',yourTurn:"C'est ton tour",askBtn:'Poser la question',cancel:'Annuler',
+  guessBtn:`Deviner${NB}: c'est …${NB}?`,you:'Toi',flipNow:'Maintenant, retourne les personnages qui ne vont pas.',
+  endTurn:"J'ai fini → à l'ordinateur",cpuAsks:"L'ordinateur demande",
+  tryAgain:`Ce n'est pas la bonne réponse. Essaie encore une fois${NB}!`,choose:`Regarde ton personnage et choisis la bonne réponse${NB}:`,
+  fixed:`Maintenant, c'est juste${NB}! Bravo, tu as corrigé ta réponse.`,first:`Très bien${NB}! C'est la bonne réponse du premier coup.`,
+  cont:"Continuer → c'est ton tour",statYou:'Tes cartes debout',statCpu:"Il reste à l'ordinateur",
+  hTruth:n=>`Regarde bien${NB}: cette réponse ne va pas avec ${n}.`,
+  hLes:`Avec <b>les cheveux</b> et <b>les yeux</b>, on garde <b>les</b>${NB}: <i>Mon personnage n'a pas les yeux bleus.</i>`,
+  hNeg:`Après <b>ne … pas</b>, <b>un / une / des</b> devient <b>de</b> (<b>d'</b> devant une voyelle)${NB}: <i>Mon personnage ne porte pas de pull.</i>`,
+  hAgree:`La couleur s'accorde avec le vêtement${NB}: <i>une jupe verte, des chaussettes noires</i>.`,
+  win:`Bravo, tu as gagné${NB}! 🎉`,lose:"L'ordinateur a gagné.",
+  winTxt:(n,k)=>`Tu as trouvé ${n} avec ${k} question${k>1?'s':''}.`,loseTxt:(y,c)=>`L'ordinateur a trouvé ${y}. Son personnage, c'était ${c}.`,
+  yourP:'ton personnage',cpuPers:'le personnage du PC',seeBoard:'Voir le plateau',
+  guessTxt:"Si ce n'est pas le bon personnage, la carte se retourne et c'est le tour de l'ordinateur.",guessYes:`Oui, je devine${NB}!`,
+  cpuNext:"Maintenant, c'est le tour de l'ordinateur.",
+  quitH:`Nouvelle partie${NB}?`,quitP:"La partie en cours s'arrête.",quitYes:'Oui, nouvelle partie',quitNo:'Continuer à jouer',
+  close:'Fermer',
+  gPlus:`<b>en plus</b>${NB}: ces mots sont en bleu dans le livre (p.${NB}179) ou dans le texte (p.${NB}18). Un pantalon baggy est aussi un pantalon.`,
+  gColors:`La couleur vient <b>après</b> le nom et s'accorde${NB}: un pull vert, une jupe verte, des chaussettes vertes. <b>orange</b> et <b>marron</b> ne changent jamais.`
+},
+de:{
+  flag:'🇫🇷 Français',flagAria:'Passer en français',
+  lead:`Das Ratespiel zur <b>Unité 1</b>: Kleidung, Farben und Aussehen. Stelle Fragen auf Französisch, drehe Karten um und finde die geheime Person.`,
+  vocabHint:`Im Spiel zeigt der Knopf <b>Vocabulaire</b> alle Wörter mit deutscher Übersetzung. Der 🔊-Knopf liest die Frage auf Französisch vor.`,
+  src:`Wortschatz: Découvertes 2, Unité 1, Atelier B (Schülerbuch S. 178–179).`,
+  credit:`Ein Spiel von <b>Jan Wilsker-Wiesen</b> · erstellt mit Claude`,
+  duoH:'Zu zweit · 2 iPads',
+  duo1:`Gebt auf beiden iPads <b>denselben Code</b> ein. Dann habt ihr dieselben 24 Personen.`,
+  duo2:`Jede und jeder bekommt eine geheime Person.`,
+  duo3:`Stellt eure Fragen abwechselnd <b>laut auf Französisch</b>: ${Q(`Est-ce que ton personnage porte une jupe verte${NB}?`)} Antwort: ${Q('Non, mon personnage ne porte pas de jupe verte.')}<br>Sagt immer <b>mon personnage</b>, nicht <i>il</i> oder <i>elle</i>. So verratet ihr nicht, ob es ein Junge oder ein Mädchen ist.`,
+  duo4:`Tippe eine Karte an, um sie umzudrehen. Wer zuerst die richtige Person findet, gewinnt: ${Q(`Est-ce que c'est Lola${NB}?`)}`,
+  codeLabel:'Spielcode',startDuo:"Los geht's",
+  cpuH:'Gegen den Computer',
+  cpuP:`Zum Üben allein. Du baust deine Fragen aus Wörtern. Der Computer stellt dir auch Fragen, und du wählst die richtige Antwort. Achte auf <i>ne … pas de</i> und auf die Farben!`,
+  startCpu:'Übung starten',
+  secretTitle:'Deine geheime Person',
+  secretDuo:`Merk dir deine Person gut und zeig dein iPad nicht deinem Partner oder deiner Partnerin. Rechts kannst du deine Karte wieder ansehen.`,
+  secretCpu:`Der Computer sucht deine Person. Du suchst die Person des Computers. Du fängst an!`,
+  go:"Los geht's!",
+  pillCode:c=>`Spielcode: <b>${c}</b>`,pillCpu:'Übung gegen den Computer',vocabBtn:'Wörter',newGame:'Neues Spiel',
+  noteGuess:'Tippe auf die Person, die du raten willst.',
+  noteTidy:'Tippe eine Karte an, um sie umzudrehen. Die anderen Karten rücken zusammen.',
+  noteNormal:'Tippe eine Karte an, um sie umzudrehen. Tippe noch einmal, um sie zurückzudrehen.',
+  tidyShow:n=>`Umgedrehte Karten zeigen (${n})`,tidyHide:'Umgedrehte Karten wegräumen',
+  inv:c=>`<b>${c}</b> bleibt immer gleich.`,
+  genre:(f,pl)=>`${f?'feminin':'maskulin'}, ${pl?'Plural':'Singular'}`,
+  same:a=>`Die Farbe bleibt <b>${a}</b>.`,change:(b,a)=>`<b>${b}</b> wird zu <b>${a}</b>.`,
+  lblItem:'Kleidungsstück',lblColor:'Farbe (wenn du willst)',lblLen:'Haare: lang oder kurz?',lblHcol:'Haarfarbe',lblEyes:'oder: Augenfarbe',
+  empty:'Wähle Wörter aus: Hier erscheint deine Frage.',listen:'Anhören',
+  logTitle:'Die Fragen',whoYou:'Du',whoCpu:'PC',
+  mine:'Meine Person',cpuMine:'Deine Person (der Computer sucht)',see:'Ansehen',hide:'Verstecken',
+  hiddenTxt:'Versteckt: Niemand schaut zu!',shownTxt:'In deiner Antwort sagst du: <b>mon personnage</b>',
+  zoomHint:'Tippe auf die Karte, um sie zu vergrößern.',zoomAria:'Meine Person vergrößern',zoomClose:'Tippe, um zu schließen.',
+  askTitle:'Frage stellen',ansShow:'Was antworte ich für meine Person?',ansHide:'Antwort verstecken',
+  answerBox:'Antworten und raten',guessLbl:'raten',standing:'Karten noch offen',reveal:'Meine Person zeigen',
+  over:'Das Spiel ist vorbei.',again:'Noch eine Runde',yourTurn:'Du bist dran',askBtn:'Frage stellen',cancel:'Abbrechen',
+  guessBtn:`Raten: c'est …${NB}?`,you:'Du',flipNow:'Dreh jetzt die Personen um, die nicht passen.',
+  endTurn:'Fertig → der Computer ist dran',cpuAsks:'Der Computer fragt',
+  tryAgain:'Das ist nicht die richtige Antwort. Versuch es noch einmal!',choose:'Schau dir deine Person an und wähle die richtige Antwort:',
+  fixed:'Jetzt stimmt es! Super, du hast deine Antwort verbessert.',first:'Sehr gut! Gleich beim ersten Mal richtig.',
+  cont:'Weiter → du bist dran',statYou:'Deine offenen Karten',statCpu:'Dem Computer bleiben',
+  hTruth:n=>`Schau genau hin: Diese Antwort passt nicht zu ${n}.`,
+  hLes:`Bei <b>les cheveux</b> und <b>les yeux</b> bleibt <b>les</b> stehen: <i>Mon personnage n'a pas les yeux bleus.</i>`,
+  hNeg:`Nach <b>ne … pas</b> wird <b>un / une / des</b> zu <b>de</b> (vor Vokal <b>d'</b>): <i>Mon personnage ne porte pas de pull.</i>`,
+  hAgree:`Die Farbe richtet sich nach dem Kleidungsstück: <i>une jupe verte, des chaussettes noires</i>.`,
+  win:'Super, du hast gewonnen! 🎉',lose:'Der Computer hat gewonnen.',
+  winTxt:(n,k)=>`Du hast ${n} mit ${k} ${k>1?'Fragen':'Frage'} gefunden.`,loseTxt:(y,c)=>`Der Computer hat ${y} gefunden. Seine Person war ${c}.`,
+  yourP:'deine Person',cpuPers:'Person des Computers',seeBoard:'Spielbrett ansehen',
+  guessTxt:'Wenn es nicht die richtige Person ist, dreht sich die Karte um und der Computer ist dran.',guessYes:'Ja, ich rate!',
+  cpuNext:'Jetzt ist der Computer dran.',
+  quitH:'Neues Spiel?',quitP:'Das laufende Spiel wird beendet.',quitYes:'Ja, neues Spiel',quitNo:'Weiterspielen',
+  close:'Schließen',
+  gPlus:`<b>en plus</b>: Diese Wörter stehen im Buch blau (S. 179) oder im Text (S. 18). Ein <i>pantalon baggy</i> ist auch ein <i>pantalon</i>.`,
+  gColors:`Die Farbe steht <b>hinter</b> dem Nomen und wird angeglichen: un pull vert, une jupe verte, des chaussettes vertes. <b>orange</b> und <b>marron</b> bleiben immer gleich.`
+}};
+function tl(lang,k,...a){const v=TXT[lang][k];return typeof v==='function'?v(...a):v}
+const t=(k,...a)=>tl(L,k,...a);
+const flagBtn=(lang,target)=>`<button class="flag" data-act="lang" data-v="${target}" aria-label="${tl(lang,'flagAria')}">${tl(lang,'flag')}</button>`;
+
 // ---------------- accueil ----------------
-function renderStart(){
+// Chaque encadré de l'accueil a son propre drapeau : on peut lire une seule consigne en allemand.
+const ST0={demo:null,code:null,lang:{hero:'fr',duo:'fr',cpu:'fr'}};
+function renderStart(fresh){
   S=null;closeModal();
-  const demo=generate('d'+Math.floor(Math.random()*999)).slice(0,7);
-  const code=String(1000+Math.floor(Math.random()*9000));
+  if(fresh!==false||!ST0.demo){ST0.demo=generate('d'+Math.floor(Math.random()*999)).slice(0,7);ST0.code=String(1000+Math.floor(Math.random()*9000))}
+  const input=document.getElementById('codeInput');if(input&&fresh===false)ST0.code=input.value;
+  const {hero,duo,cpu}=ST0.lang;
   app.innerHTML=`<div class="start">
     <section class="hero">
-      <h1>Qui est-<span class="q">ce${NB}?</span></h1>
-      <p class="lead">Le jeu de l'<b>Unité 1</b>&#8239;: les vêtements, les couleurs et le look. Pose des questions en français, retourne les cartes et trouve le personnage secret.</p>
-      <div class="parade" aria-hidden="true">${demo.map(svgFor).join('')}</div>
-      <p class="lead" style="font-size:15px;margin-top:18px">Dans le jeu, le bouton <b>Vocabulaire</b> montre tous les mots avec la traduction en allemand. Le bouton 🔊 lit la question en français.</p>
-      <p class="src">Vocabulaire${NB}: Découvertes 2, Unité 1, Atelier B (livre p.${NB}178–179).</p>
-      <p class="credit">Un jeu de <b>Jan Wilsker-Wiesen</b> · créé avec Claude</p>
+      <div class="herotop"><h1>Qui est-<span class="q">ce${NB}?</span></h1>${flagBtn(hero,'hero')}</div>
+      <p class="lead">${tl(hero,'lead')}</p>
+      <div class="parade" aria-hidden="true">${ST0.demo.map(svgFor).join('')}</div>
+      <p class="lead" style="font-size:15px;margin-top:18px">${tl(hero,'vocabHint')}</p>
+      <p class="src">${tl(hero,'src')}</p>
+      <p class="credit">${tl(hero,'credit')}</p>
     </section>
     <section class="modes">
       <div class="mode">
-        <h2>À deux · 2 iPads</h2>
-        <ol>
-          <li>Tapez <b>le même code</b> sur les deux iPads. Vous avez alors les mêmes 24 personnages.</li>
-          <li>Chacun et chacune reçoit un personnage secret.</li>
-          <li>Posez vos questions <b>à voix haute</b>, chacun à son tour${NB}: ${Q(`Est-ce que ton personnage porte une jupe verte${NB}?`)} Réponse${NB}: ${Q('Non, mon personnage ne porte pas de jupe verte.')}<br>Dites toujours <b>mon personnage</b>, pas <i>il</i> ou <i>elle</i>. Comme ça, on ne sait pas si c'est un garçon ou une fille.</li>
-          <li>Touche une carte pour la retourner. Le premier ou la première qui trouve le personnage gagne${NB}: ${Q(`Est-ce que c'est Lola${NB}?`)}</li>
-        </ol>
-        <div class="coderow"><label for="codeInput">Code du jeu</label><input id="codeInput" inputmode="numeric" maxlength="6" value="${code}" autocomplete="off"><button class="btn primary" id="goDuo">Commencer</button></div>
+        <div class="modehead"><h2>${tl(duo,'duoH')}</h2>${flagBtn(duo,'duo')}</div>
+        <ol><li>${tl(duo,'duo1')}</li><li>${tl(duo,'duo2')}</li><li>${tl(duo,'duo3')}</li><li>${tl(duo,'duo4')}</li></ol>
+        <div class="coderow"><label for="codeInput">${tl(duo,'codeLabel')}</label><input id="codeInput" inputmode="numeric" maxlength="6" value="${esc(ST0.code)}" autocomplete="off"><button class="btn primary" id="goDuo">${tl(duo,'startDuo')}</button></div>
       </div>
       <div class="mode">
-        <h2>Contre l'ordinateur</h2>
-        <p>Pour t'entraîner seul ou seule. Tu construis tes questions avec des mots. L'ordinateur te pose aussi des questions et tu choisis la bonne réponse. Attention à <i>ne … pas de</i> et aux couleurs${NB}!</p>
-        <div class="row"><button class="btn blue" id="goCpu">Commencer l'entraînement</button></div>
+        <div class="modehead"><h2>${tl(cpu,'cpuH')}</h2>${flagBtn(cpu,'cpu')}</div>
+        <p>${tl(cpu,'cpuP')}</p>
+        <div class="row"><button class="btn blue" id="goCpu">${tl(cpu,'startCpu')}</button></div>
       </div>
     </section>
   </div>`;
-  document.getElementById('goDuo').onclick=()=>{const v=(document.getElementById('codeInput').value||'').trim()||code;startGame('duo',v)};
-  document.getElementById('goCpu').onclick=()=>startGame('cpu',String(Math.floor(Math.random()*1e6)));
+  // le jeu démarre dans la langue de l'encadré choisi
+  document.getElementById('goDuo').onclick=()=>{const v=(document.getElementById('codeInput').value||'').trim()||ST0.code;L=ST0.lang.duo;startGame('duo',v)};
+  document.getElementById('goCpu').onclick=()=>{L=ST0.lang.cpu;startGame('cpu',String(Math.floor(Math.random()*1e6)))};
 }
 
 // ---------------- jeu ----------------
+function secretIntro(){
+  const mine=S.secret;
+  modal(`<h2>${t('secretTitle')}</h2>
+    <div class="big">${svgFor(mine)}<div class="name">${esc(mine.name)}</div></div>
+    <p>${S.mode==='duo'?t('secretDuo'):t('secretCpu')}</p>
+    <div class="row"><button class="btn primary" data-act="close">${t('go')}</button></div>`,false,'secret');
+}
 function startGame(mode,code){
   const chars=generate(code);
   const mine=chars[Math.floor(Math.random()*24)];
   S={mode,code,chars,secret:mine,flipped:new Set(),hideSecret:true,tidy:false,guessing:false,log:[],asked:0,
      cpu:mode==='cpu'?{secret:chars[Math.floor(Math.random()*24)],rem:chars.slice()}:null,
      turn:'you',phase:'ask',lastAns:null,cpuQ:null,cpuOpts:null,cpuFb:null};
-  resetBuilder();renderGame();
-  modal(`<h2>Ton personnage secret</h2>
-    <div class="big">${svgFor(mine)}<div class="name">${esc(mine.name)}</div></div>
-    <p>${mode==='duo'?`Retiens bien ton personnage et ne montre pas ton iPad à ton ou ta partenaire. Tu peux revoir ta carte à droite.`:`L'ordinateur cherche ton personnage. Toi, tu cherches le personnage de l'ordinateur. Tu commences${NB}!`}</p>
-    <div class="row"><button class="btn primary" data-act="close">C'est parti${NB}!</button></div>`);
+  resetBuilder();renderGame();secretIntro();
+}
+function topbarHTML(){
+  return `<h1>Qui est-ce${NB}?</h1>
+      <div class="meta">
+        ${S.mode==='duo'?`<span class="pill">${t('pillCode',esc(S.code))}</span>`:`<span class="pill">${t('pillCpu')}</span>`}
+        <button class="btn small" data-act="gloss">${t('vocabBtn')}</button>
+        <button class="btn small" data-act="quit">${t('newGame')}</button>
+        ${flagBtn(L,'game')}
+      </div>`;
 }
 function renderGame(){
-  app.innerHTML=`<div class="topbar">
-      <h1>Qui est-ce${NB}?</h1>
-      <div class="meta">
-        ${S.mode==='duo'?`<span class="pill">Code du jeu${NB}: <b>${esc(S.code)}</b></span>`:`<span class="pill">Entraînement contre l'ordinateur</span>`}
-        <button class="btn small" data-act="gloss">Vocabulaire</button>
-        <button class="btn small" data-act="quit">Nouvelle partie</button>
-      </div>
-    </div>
+  app.innerHTML=`<div class="topbar" id="topbar">${topbarHTML()}</div>
     <div class="game">
       <div><div class="board" id="board"></div><div class="boardbar"><p class="boardnote" id="boardnote"></p><button class="btn small" id="tidyBtn" data-act="tidy"></button></div></div>
       <aside class="side" id="side"></aside>
@@ -545,153 +705,150 @@ function hideLater(el,id){
     el.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.7)'}],{duration:220,easing:'ease-in'}).onfinish=go;
   },calm()?0:520);
 }
+function tidyLabel(){const t0=document.getElementById('tidyBtn');if(t0){t0.textContent=S.tidy?t('tidyShow',S.flipped.size):t('tidyHide');t0.disabled=S.tidy&&!S.flipped.size}}
 function syncBoard(){
   document.querySelectorAll('.card').forEach(el=>{const f=S.flipped.has(+el.dataset.card);el.classList.toggle('flipped',f);el.hidden=S.tidy&&f});
   const b=document.getElementById('board');if(b)b.classList.toggle('guessing',S.guessing);
   const n=document.getElementById('boardnote');
-  if(n)n.textContent=S.guessing?'Touche le personnage que tu veux deviner.':S.tidy?'Touche une carte pour la retourner. Les autres cartes se rapprochent.':'Touche une carte pour la retourner. Touche encore une fois pour la remettre.';
-  const t=document.getElementById('tidyBtn');
-  if(t){t.textContent=S.tidy?`Montrer les cartes retournées (${S.flipped.size})`:'Ranger les cartes retournées';t.disabled=S.tidy&&!S.flipped.size}
+  if(n)n.textContent=S.guessing?t('noteGuess'):S.tidy?t('noteTidy'):t('noteNormal');
+  tidyLabel();
 }
 const standing=()=>24-S.flipped.size;
 
 function agreeHint(q){
   if(!q||q.kind!=='wear'||!q.color)return'';
   const it=ITEMS[q.item],a=adj(q.color,q.item),base=COLORS[q.color].f[0];
-  if(q.color==='orange'||q.color==='marron')return `<p class="hint"><b>${q.color}</b> ne change jamais.</p>`;
-  const genre=`${it.g==='f'?'féminin':'masculin'} ${it.pl?'pluriel':'singulier'}`;
-  if(a===base)return `<p class="hint"><b>${art(q.item)} ${q.item}</b>${NB}: ${genre}. La couleur reste <b>${a}</b>.</p>`;
-  return `<p class="hint"><b>${art(q.item)} ${q.item}</b>${NB}: ${genre}. <b>${base}</b> devient <b>${a}</b>.</p>`;
+  if(q.color==='orange'||q.color==='marron')return `<p class="hint">${t('inv',q.color)}</p>`;
+  const head=`<b>${art(q.item)} ${q.item}</b>${L==='fr'?NB:''}: ${t('genre',it.g==='f',it.pl)}.`;
+  return `<p class="hint">${head} ${a===base?t('same',a):t('change',base,a)}</p>`;
 }
 function builderHTML(){
   const tabs=[['wear','porte …'],['have','a les cheveux / les yeux …'],['is',"c'est …"]];
   let h=`<div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${B.tab===k?'on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</div>`;
   if(B.tab==='wear'){
-    h+=`<div class="label">Le vêtement</div><div class="chips">${Object.keys(ITEMS).map(i=>`<button class="chip ${B.item===i?'on':''}" data-act="item" data-v="${i}"><i>${art(i)}</i>${i}</button>`).join('')}</div>
-    <div class="label">La couleur (si tu veux)</div><div class="chips">${CK.map(c=>`<button class="chip ${B.color===c?'on':''}" data-act="color" data-v="${c}"><span class="sw" style="background:${COLORS[c].hex}"></span>${B.item?adj(c,B.item):c}</button>`).join('')}</div>`;
+    h+=`<div class="label">${t('lblItem')}</div><div class="chips">${Object.keys(ITEMS).map(i=>`<button class="chip ${B.item===i?'on':''}" data-act="item" data-v="${i}">${icon(i)}<i>${art(i)}</i>${i}</button>`).join('')}</div>
+    <div class="label">${t('lblColor')}</div><div class="chips">${CK.map(c=>`<button class="chip ${B.color===c?'on':''}" data-act="color" data-v="${c}"><span class="sw" style="background:${COLORS[c].hex}"></span>${B.item?adj(c,B.item):c}</button>`).join('')}</div>`;
   }else if(B.tab==='have'){
-    h+=`<div class="label">Les cheveux${NB}: longs ou courts${NB}?</div><div class="chips">${Object.keys(LEN).map(k=>`<button class="chip ${B.len===k?'on':''}" data-act="len" data-v="${k}">${LEN[k]}</button>`).join('')}</div>
-    <div class="label">Les cheveux${NB}: la couleur</div><div class="chips">${Object.keys(HAIR).map(k=>`<button class="chip ${B.hcol===k?'on':''}" data-act="hcol" data-v="${k}"><span class="sw" style="background:${HAIR[k].hex}"></span>${HAIR[k].f}</button>`).join('')}</div>
-    <div class="label">ou${NB}: les yeux</div><div class="chips">${Object.keys(EYES).map(k=>`<button class="chip ${B.eyes===k?'on':''}" data-act="eyes" data-v="${k}"><span class="sw" style="background:${EYES[k].hex}"></span>${EYES[k].f}</button>`).join('')}</div>`;
+    h+=`<div class="label">${t('lblLen')}</div><div class="chips">${Object.keys(LEN).map(k=>`<button class="chip ${B.len===k?'on':''}" data-act="len" data-v="${k}">${LEN[k]}</button>`).join('')}</div>
+    <div class="label">${t('lblHcol')}</div><div class="chips">${Object.keys(HAIR).map(k=>`<button class="chip ${B.hcol===k?'on':''}" data-act="hcol" data-v="${k}"><span class="sw" style="background:${HAIR[k].hex}"></span>${HAIR[k].f}</button>`).join('')}</div>
+    <div class="label">${t('lblEyes')}</div><div class="chips">${Object.keys(EYES).map(k=>`<button class="chip ${B.eyes===k?'on':''}" data-act="eyes" data-v="${k}"><span class="sw" style="background:${EYES[k].hex}"></span>${EYES[k].f}</button>`).join('')}</div>`;
   }else{
     h+=`<div class="chips"><button class="chip ${B.who==='garcon'?'on':''}" data-act="who" data-v="garcon">un garçon</button><button class="chip ${B.who==='fille'?'on':''}" data-act="who" data-v="fille">une fille</button></div>`;
   }
   const q=curQ();
-  h+=q?`<div class="sentence"><span>${qText(q,true)}</span><button class="speak" data-act="say" aria-label="Écouter">🔊</button></div>${agreeHint(q)}`:`<div class="sentence empty">Choisis des mots${NB}: ta question apparaît ici.</div>`;
+  h+=q?`<div class="sentence"><span>${qText(q,true)}</span><button class="speak" data-act="say" aria-label="${t('listen')}">🔊</button></div>${agreeHint(q)}`:`<div class="sentence empty">${t('empty')}</div>`;
   return h;
 }
 function logHTML(){
   if(!S.log.length)return'';
-  return `<div class="box"><h3>Les questions</h3><ul class="log">${S.log.slice(-6).reverse().map(l=>`<li><span class="who ${l.who==='cpu'?'cpu':''}">${l.who==='cpu'?'PC':'Toi'}</span><span>${esc(l.q)} <em>${esc(l.a)}</em></span></li>`).join('')}</ul></div>`;
+  return `<div class="box"><h3>${t('logTitle')}</h3><ul class="log">${S.log.slice(-6).reverse().map(l=>`<li><span class="who ${l.who==='cpu'?'cpu':''}">${l.who==='cpu'?t('whoCpu'):t('whoYou')}</span><span>${esc(l.q)} <em>${esc(l.a)}</em></span></li>`).join('')}</ul></div>`;
 }
 function secretBox(title){
   const c=S.secret;
-  return `<div class="box"><h3>${title}<button class="btn small" data-act="toggleSecret">${S.hideSecret?'Voir':'Cacher'}</button></h3>
-    <div class="secret"><button class="mini ${S.hideSecret?'hide':''}" data-act="zoom" aria-label="Agrandir mon personnage">${svgFor(c)}</button>
-    <p>${S.hideSecret?`Caché${NB}: personne ne regarde${NB}!`:`<strong>${esc(c.name)}</strong>Dans ta réponse, tu dis${NB}: <b>mon personnage</b>`}<br>Touche la carte pour l'agrandir.</p></div></div>`;
+  return `<div class="box"><h3>${title}<button class="btn small" data-act="toggleSecret">${S.hideSecret?t('see'):t('hide')}</button></h3>
+    <div class="secret"><button class="mini ${S.hideSecret?'hide':''}" data-act="zoom" aria-label="${t('zoomAria')}">${svgFor(c)}</button>
+    <p>${S.hideSecret?t('hiddenTxt'):`<strong>${esc(c.name)}</strong>${t('shownTxt')}`}<br>${t('zoomHint')}</p></div></div>`;
 }
 function renderSide(){
   const side=document.getElementById('side');if(!side)return;
   if(S.mode==='duo'){
     const q=curQ();let ans='';
     if(q&&B.showAns){const y=evalQ(S.secret,q);ans=`<div class="bubble ${y?'yes':'no'}">${esc(answerText(q,y))}</div>`}
-    side.innerHTML=`${secretBox('Mon personnage')}
-      <div class="box"><h3>Pose une question</h3>${builderHTML()}
-        ${q?`<button class="btn small" data-act="ans">${B.showAns?'Cacher la réponse':"Qu'est-ce que je réponds pour mon personnage${NB}?"}</button>${ans}`:''}
+    side.innerHTML=`${secretBox(t('mine'))}
+      <div class="box"><h3>${t('askTitle')}</h3>${builderHTML()}
+        ${q?`<button class="btn small" data-act="ans">${B.showAns?t('ansHide'):t('ansShow')}</button>${ans}`:''}
       </div>
-      <div class="box"><h3>Répondre et deviner</h3>
+      <div class="box"><h3>${t('answerBox')}</h3>
         <ul class="phr">
           <li><span>Oui, mon personnage porte un pull vert.</span><span>porte …${NB}?</span></li>
           <li><span>Non, mon personnage ne porte <b>pas de</b> jupe.</span><span>porte …${NB}?</span></li>
           <li><span>Oui, mon personnage a les cheveux longs.</span><span>a …${NB}?</span></li>
           <li><span>Non, mon personnage <b>n'a pas</b> les yeux bleus.</span><span>a …${NB}?</span></li>
-          <li><span>Est-ce que c'est Lola${NB}? Oui${NB}!</span><span>deviner</span></li>
+          <li><span>Est-ce que c'est Lola${NB}? Oui${NB}!</span><span>${t('guessLbl')}</span></li>
         </ul>
-        <div class="stats"><div><span class="label">Cartes encore debout</span><span class="count">${standing()}</span></div></div>
-        <button class="btn" data-act="reveal">Montrer mon personnage</button>
+        <div class="stats"><div><span class="label">${t('standing')}</span><span class="count">${standing()}</span></div></div>
+        <button class="btn" data-act="reveal">${t('reveal')}</button>
       </div>`;
     return;
   }
   let main='';
   if(S.turn==='over'){
-    main=`<div class="box"><h3>La partie est finie.</h3><button class="btn primary" data-act="again">Encore une partie</button></div>`;
+    main=`<div class="box"><h3>${t('over')}</h3><button class="btn primary" data-act="again">${t('again')}</button></div>`;
   }else if(S.turn==='you'){
     if(S.phase==='ask'){
       const q=curQ();
-      main=`<div class="box"><div class="turn"><span class="dot"></span>C'est ton tour</div>${builderHTML()}
-        <div class="row"><button class="btn primary" data-act="ask" ${q?'':'disabled'}>Poser la question</button><button class="btn" data-act="guess">${S.guessing?'Annuler':`Deviner${NB}: c'est …${NB}?`}</button></div></div>`;
+      main=`<div class="box"><div class="turn"><span class="dot"></span>${t('yourTurn')}</div>${builderHTML()}
+        <div class="row"><button class="btn primary" data-act="ask" ${q?'':'disabled'}>${t('askBtn')}</button><button class="btn" data-act="guess">${S.guessing?t('cancel'):t('guessBtn')}</button></div></div>`;
     }else{
       const a=S.lastAns;
-      main=`<div class="box"><div class="turn"><span class="dot"></span>C'est ton tour</div>
-        <p class="fb">Toi${NB}: <b>${esc(a.q)}</b></p>
+      main=`<div class="box"><div class="turn"><span class="dot"></span>${t('yourTurn')}</div>
+        <p class="fb">${t('you')}${L==='fr'?NB:''}: <b>${esc(a.q)}</b></p>
         <div class="bubble ${a.yes?'yes':'no'}">${esc(a.a)}</div>
-        <p class="fb">Maintenant, retourne les personnages qui ne vont pas.</p>
-        <div class="row"><button class="btn blue" data-act="endTurn">J'ai fini → à l'ordinateur</button></div></div>`;
+        <p class="fb">${t('flipNow')}</p>
+        <div class="row"><button class="btn blue" data-act="endTurn">${t('endTurn')}</button></div></div>`;
     }
   }else{
     const q=S.cpuQ;
     if(!S.cpuFb){
-      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>L'ordinateur demande</div>
-        <div class="bubble cpu" style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span>${esc(qText(q))}</span><button class="speak" data-act="sayCpu" aria-label="Écouter">🔊</button></div>
-        ${S.cpuTry?`<p class="fb bad">Ce n'est pas la bonne réponse. Essaie encore une fois${NB}!</p><p class="fb">${S.cpuTry}</p>`:`<p class="fb">Regarde ton personnage et choisis la bonne réponse${NB}:</p>`}
+      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>${t('cpuAsks')}</div>
+        <div class="bubble cpu" style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span>${esc(qText(q))}</span><button class="speak" data-act="sayCpu" aria-label="${t('listen')}">🔊</button></div>
+        ${S.cpuErr?`<p class="fb bad">${t('tryAgain')}</p><p class="fb">${hintFor(S.cpuErr)}</p>`:`<p class="fb">${t('choose')}</p>`}
         <div class="answers">${S.cpuOpts.map((o,i)=>`<button class="btn ${o.tried?'wrong':''}" data-act="cpuAns" data-v="${i}" ${o.tried?'disabled':''}>${o.tried?'✗ ':''}${esc(o.t)}</button>`).join('')}</div></div>`;
     }else{
       const f=S.cpuFb;
-      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>L'ordinateur demande</div>
+      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>${t('cpuAsks')}</div>
         <div class="bubble cpu">${esc(qText(q))}</div>
         <div class="bubble ${f.yes?'yes':'no'}">✓ ${esc(f.correct)}</div>
-        ${f.tries?`<p class="fb ok">Maintenant, c'est juste${NB}! Bravo, tu as corrigé ta réponse.</p>`:`<p class="fb ok">Très bien${NB}! C'est la bonne réponse du premier coup.</p>`}
-        <div class="row"><button class="btn primary" data-act="toYou">Continuer → c'est ton tour</button></div></div>`;
+        <p class="fb ok">${f.tries?t('fixed'):t('first')}</p>
+        <div class="row"><button class="btn primary" data-act="toYou">${t('cont')}</button></div></div>`;
     }
   }
   side.innerHTML=`${main}
     <div class="box"><div class="stats">
-      <div><span class="label">Tes cartes debout</span><span class="count">${standing()}</span></div>
-      <div><span class="label">Il reste à l'ordinateur</span><span class="count">${S.cpu.rem.length}</span></div>
+      <div><span class="label">${t('statYou')}</span><span class="count">${standing()}</span></div>
+      <div><span class="label">${t('statCpu')}</span><span class="count">${S.cpu.rem.length}</span></div>
     </div></div>
-    ${secretBox("Ton personnage (l'ordinateur cherche)")}
+    ${secretBox(t('cpuMine'))}
     ${logHTML()}`;
 }
-const HINTS={
-  truth:c=>`Regarde bien${NB}: cette réponse ne va pas avec ${esc(c.name)}.`,
-  les:()=>`Avec <b>les cheveux</b> et <b>les yeux</b>, on garde <b>les</b>${NB}: <i>Mon personnage n'a pas les yeux bleus.</i>`,
-  neg:()=>`Après <b>ne … pas</b>, <b>un / une / des</b> devient <b>de</b> (<b>d'</b> devant une voyelle)${NB}: <i>Mon personnage ne porte pas de pull.</i>`,
-  agree:()=>`La couleur s'accorde avec le vêtement${NB}: <i>une jupe verte, des chaussettes noires</i>.`
-};
+function hintFor(err){
+  return err==='truth'?t('hTruth',esc(S.secret.name)):err==='les'?t('hLes'):err==='neg'?t('hNeg'):t('hAgree');
+}
 function cpuStart(){
   const rem=S.cpu.rem;
   if(rem.length<=2){const g=rem[Math.floor(Math.random()*rem.length)];S.cpuQ={kind:'name',id:g.id,name:g.name}}
   else S.cpuQ=cpuQuestion(rem)||{kind:'name',id:rem[0].id,name:rem[0].name};
-  S.cpuOpts=answerOptions(S.secret,S.cpuQ);S.cpuFb=null;S.cpuTry='';S.cpuTries=0;S.turn='cpu';renderSide();
+  S.cpuOpts=answerOptions(S.secret,S.cpuQ);S.cpuFb=null;S.cpuErr=null;S.cpuTries=0;S.turn='cpu';renderSide();
 }
 // Une mauvaise réponse est barrée, l'élève lit l'explication et choisit encore une fois.
 function cpuAnswered(i){
   const q=S.cpuQ,yes=evalQ(S.secret,q),correct=answerText(q,yes),o=S.cpuOpts[i];
-  if(o.err){o.tried=true;S.cpuTries++;S.cpuTry=HINTS[o.err](S.secret);renderSide();return}
-  S.cpuFb={correct,yes,tries:S.cpuTries};S.cpuTry='';
+  if(o.err){o.tried=true;S.cpuTries++;S.cpuErr=o.err;renderSide();return}
+  S.cpuFb={correct,yes,tries:S.cpuTries};S.cpuErr=null;
   S.log.push({who:'cpu',q:qText(q),a:correct});
   if(q.kind==='name'&&yes){S.turn='over';renderSide();setTimeout(()=>endModal(false),500);return}
   S.cpu.rem=S.cpu.rem.filter(c=>evalQ(c,q)===yes);
   renderSide();
 }
 function endModal(youWin){
+  S.ended=youWin?'win':'lose';
   const you=S.secret,cpu=S.cpu.secret;
-  modal(`<h2>${youWin?`Bravo, tu as gagné${NB}! 🎉`:`L'ordinateur a gagné.`}</h2>
-    <p>${youWin?`Tu as trouvé ${esc(cpu.name)} avec ${S.asked} question${S.asked>1?'s':''}.`:`L'ordinateur a trouvé ${esc(you.name)}. Son personnage, c'était ${esc(cpu.name)}.`}</p>
-    <div class="duo"><figure><div class="big">${svgFor(you)}<div class="name">${esc(you.name)}</div></div>ton personnage</figure><figure><div class="big">${svgFor(cpu)}<div class="name">${esc(cpu.name)}</div></div>le personnage du PC</figure></div>
-    <div class="row"><button class="btn primary" data-act="again">Encore une partie</button><button class="btn" data-act="close">Voir le plateau</button></div>`);
+  modal(`<h2>${youWin?t('win'):t('lose')}</h2>
+    <p>${youWin?t('winTxt',esc(cpu.name),S.asked):t('loseTxt',esc(you.name),esc(cpu.name))}</p>
+    <div class="duo"><figure><div class="big">${svgFor(you)}<div class="name">${esc(you.name)}</div></div>${t('yourP')}</figure><figure><div class="big">${svgFor(cpu)}<div class="name">${esc(cpu.name)}</div></div>${t('cpuPers')}</figure></div>
+    <div class="row"><button class="btn primary" data-act="again">${t('again')}</button><button class="btn" data-act="close">${t('seeBoard')}</button></div>`,false,'end');
 }
 function guessCard(id){
   const c=S.chars[id];
   modal(`<h2>Est-ce que c'est ${esc(c.name)}${NB}?</h2><div class="big">${svgFor(c)}<div class="name">${esc(c.name)}</div></div>
-    <p>Si ce n'est pas le bon personnage, la carte se retourne et c'est le tour de l'ordinateur.</p>
-    <div class="row"><button class="btn primary" data-act="confirmGuess" data-v="${id}">Oui, je devine${NB}!</button><button class="btn" data-act="close">Annuler</button></div>`);
+    <p>${t('guessTxt')}</p>
+    <div class="row"><button class="btn primary" data-act="confirmGuess" data-v="${id}">${t('guessYes')}</button><button class="btn" data-act="close">${t('cancel')}</button></div>`);
 }
 
 // ---------------- fenêtres ----------------
-function modal(html,wide){
+function modal(html,wide,kind){
   closeModal();
-  const o=document.createElement('div');o.className='overlay';o.id='overlay';
+  const o=document.createElement('div');o.className='overlay';o.id='overlay';o.dataset.kind=kind||'';
   o.innerHTML=`<div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div>`;
   o.addEventListener('click',e=>{if(e.target===o)closeModal()});
   document.body.appendChild(o);
@@ -702,13 +859,22 @@ function glossary(){
   const row=(fr,de)=>`<div><span>${fr}</span><span>${de}</span></div>`;
   const cf=k=>{const f=COLORS[k].f;return f[0]===f[3]?f[0]+(k==='orange'||k==='marron'?'<span class="tag">inv.</span>':''):f[0]===f[1]?`${f[0]} / ${f[2]}`:`${f[0]} / ${f[1]}`};
   modal(`<h2>Vocabulaire · Unité 1</h2><div class="gloss">
-    <h3>Les vêtements</h3>${Object.entries(ITEMS).map(([k,v])=>row(`${art(k)} ${k}${v.extra?'<span class="tag">en plus</span>':''}`,v.de)).join('')}
-    <p class="note"><b>en plus</b>${NB}: ces mots sont en bleu dans le livre (p.${NB}179) ou dans le texte (p.${NB}18). Un pantalon baggy est aussi un pantalon.</p>
+    <h3>Les vêtements</h3>${Object.entries(ITEMS).map(([k,v])=>row(`<span class="gw">${icon(k)}${art(k)} ${k}${v.extra?'<span class="tag">en plus</span>':''}</span>`,v.de)).join('')}
+    <p class="note">${t('gPlus')}</p>
     <h3>Les couleurs</h3>${CK.map(k=>row(cf(k),COLORS[k].de)).join('')}
-    <p class="note">La couleur vient <b>après</b> le nom et s'accorde${NB}: un pull vert, une jupe verte, des chaussettes vertes. <b>orange</b> et <b>marron</b> ne changent jamais.</p>
+    <p class="note">${t('gColors')}</p>
     <h3>Décrire quelqu'un</h3>${row('porter qc','etwas tragen')+row('un personnage','eine Figur, eine Person')+row('un garçon / une fille','ein Junge / ein Mädchen')+row('les cheveux longs / courts','lange / kurze Haare')+row('les cheveux bruns, blonds, roux, noirs','braune, blonde, rote, schwarze Haare')+row('les yeux bleus, verts, marron','blaue, grüne, braune Augen')+row('des lunettes (f., pl.)','eine Brille')}
     <h3>Phrases utiles</h3>${row(`Est-ce que ton personnage porte une veste${NB}?`,'Trägt deine Person eine Jacke?')+row(`Est-ce que ton personnage a les yeux bleus${NB}?`,'Hat deine Person blaue Augen?')+row('Oui, mon personnage porte une veste.','Ja, meine Person trägt eine Jacke.')+row('Non, mon personnage ne porte pas de veste.','Nein, meine Person trägt keine Jacke.')+row("Non, mon personnage n'a pas les cheveux longs.",'Nein, meine Person hat keine langen Haare.')+row(`Est-ce que c'est Lola${NB}?`,'Ist es Lola?')}
-  </div><div class="row"><button class="btn primary" data-act="close">Fermer</button></div>`,true);
+  </div><div class="row"><button class="btn primary" data-act="close">${t('close')}</button></div>`,true,'gloss');
+}
+// Changer de langue pendant le jeu : la barre, le panneau et la fenêtre ouverte suivent.
+function switchGameLang(){
+  L=L==='fr'?'de':'fr';
+  const tb=document.getElementById('topbar');if(tb)tb.innerHTML=topbarHTML();
+  syncBoard();renderSide();
+  const o=document.getElementById('overlay');if(!o)return;
+  const k=o.dataset.kind;closeModal();
+  if(k==='end')endModal(S.ended==='win');else if(k==='gloss')glossary();else if(k==='secret')secretIntro();
 }
 
 // ---------------- événements ----------------
@@ -722,15 +888,19 @@ document.addEventListener('click',e=>{
     flipCard(card,S.flipped.has(id));
     if(S.flipped.has(id))hideLater(card,id);
     const c=document.querySelector('.side .count');if(c)c.textContent=standing();
-    const t=document.getElementById('tidyBtn');if(t&&S.tidy){t.textContent=`Montrer les cartes retournées (${S.flipped.size})`;t.disabled=!S.flipped.size}
+    if(S.tidy)tidyLabel();
     return;
   }
-  const t=e.target.closest('[data-act]');if(!t)return;
-  const a=t.dataset.act,v=t.dataset.v;
+  const tg=e.target.closest('[data-act]');if(!tg)return;
+  const a=tg.dataset.act,v=tg.dataset.v;
   switch(a){
+    case'lang':
+      if(v==='game')switchGameLang();
+      else{ST0.lang[v]=ST0.lang[v]==='fr'?'de':'fr';renderStart(false)}
+      break;
     case'close':closeModal();break;
     case'gloss':glossary();break;
-    case'quit':modal(`<h2>Nouvelle partie${NB}?</h2><p>La partie en cours s'arrête.</p><div class="row"><button class="btn primary" data-act="again">Oui, nouvelle partie</button><button class="btn" data-act="close">Continuer à jouer</button></div>`);break;
+    case'quit':modal(`<h2>${t('quitH')}</h2><p>${t('quitP')}</p><div class="row"><button class="btn primary" data-act="again">${t('quitYes')}</button><button class="btn" data-act="close">${t('quitNo')}</button></div>`);break;
     case'again':renderStart();break;
     case'tab':setB({tab:v});break;
     case'item':setB({item:B.item===v?null:v});break;
@@ -744,9 +914,9 @@ document.addEventListener('click',e=>{
     case'ans':B.showAns=!B.showAns;renderSide();break;
     case'toggleSecret':S.hideSecret=!S.hideSecret;renderSide();break;
     case'zoom':{const z=document.createElement('div');z.className='zoom';z.id='zoom';
-      z.innerHTML=`<div><div class="zcard">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><p>Touche pour fermer.</p></div>`;
+      z.innerHTML=`<div><div class="zcard">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><p>${t('zoomClose')}</p></div>`;
       z.onclick=()=>z.remove();document.body.appendChild(z);break}
-    case'reveal':modal(`<h2>Mon personnage</h2><div class="big">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><div class="row"><button class="btn primary" data-act="close">Fermer</button></div>`);break;
+    case'reveal':modal(`<h2>${t('mine')}</h2><div class="big">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><div class="row"><button class="btn primary" data-act="close">${t('close')}</button></div>`);break;
     case'ask':{const q=curQ();if(!q)return;const c=S.cpu.secret,yes=evalQ(c,q);S.asked++;
       S.lastAns={q:qText(q),yes,a:answerText(q,yes)};S.log.push({who:'you',q:S.lastAns.q,a:S.lastAns.a});
       S.phase='answered';S.guessing=false;syncBoard();renderSide();speak(S.lastAns.a);break}
@@ -757,7 +927,7 @@ document.addEventListener('click',e=>{
       const right=c.id===S.cpu.secret.id;S.log.push({who:'you',q:`Est-ce que c'est ${c.name}${NB}?`,a:right?`Oui, c'est ${c.name}${NB}!`:`Non, ce n'est pas ${c.name}.`});
       if(right){S.turn='over';syncBoard();renderSide();endModal(true)}
       else{S.flipped.add(id);syncBoard();S.phase='ask';resetBuilder();cpuStart();
-        modal(`<h2>Non, ce n'est pas ${esc(c.name)}.</h2><p>Maintenant, c'est le tour de l'ordinateur.</p><div class="row"><button class="btn primary" data-act="close">OK</button></div>`)}
+        modal(`<h2>Non, ce n'est pas ${esc(c.name)}.</h2><p>${t('cpuNext')}</p><div class="row"><button class="btn primary" data-act="close">OK</button></div>`)}
       break}
     case'cpuAns':cpuAnswered(+v);break;
     case'toYou':S.turn='you';S.phase='ask';S.cpuFb=null;renderSide();break;
