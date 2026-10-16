@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Qui est-ce ?</title>
+<meta name="author" content="Jan Wilsker-Wiesen">
+<meta name="description" content="Jeu de devinettes pour l'Unité 1 de Découvertes 2 : les vêtements, les couleurs et le look. Un jeu de Jan Wilsker-Wiesen, créé avec Claude.">
+<meta name="theme-color" content="#2d4c9e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Qui est-ce ?">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{font-size:16px}
+img{max-width:100%}
+/* Layout: a blue game-board tray of flip cards on the left, a question-builder console on the right; stacks on portrait/phone. */
+:root{
+  --paper:#eef1f8; --panel:#ffffff; --ink:#1d2340; --muted:#5b6487; --line:#d6dbea;
+  --board:#2d4c9e; --board-deep:#213a7e; --card:#fffdf7; --plate:#f3eedf;
+  --accent:#ffc53d; --accent-ink:#3b2a00; --yes:#2c9a59; --no:#d2453a; --chip:#f2f4fa; --tag:#e8ecf7;
+  --display:"Baloo 2", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12162a; --panel:#1b2038; --ink:#e9ecf8; --muted:#a0a8c8; --line:#2f3656;
+  --board:#22397d; --board-deep:#182a60; --card:#fbf7ec; --plate:#ece5d1;
+  --accent:#ffc53d; --accent-ink:#3b2a00; --yes:#43b673; --no:#ec6a5f; --chip:#252b48; --tag:#2a3150; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12162a; --panel:#1b2038; --ink:#e9ecf8; --muted:#a0a8c8; --line:#2f3656;
+  --board:#22397d; --board-deep:#182a60; --card:#fbf7ec; --plate:#ece5d1;
+  --accent:#ffc53d; --accent-ink:#3b2a00; --yes:#43b673; --no:#ec6a5f; --chip:#252b48; --tag:#2a3150; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-tap-highlight-color:transparent;margin:0}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:16px 40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{border-radius:14px;padding:12px 18px;font-weight:800;background:var(--chip);color:var(--ink);border:2px solid var(--line)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.blue{background:var(--board);color:#fff;border-color:transparent}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.small{padding:8px 12px;font-size:14px;border-radius:11px}
+
+/* ---------- accueil ---------- */
+.start{display:grid;gap:24px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start;padding-top:12px}
+@media (max-width:860px){.start{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(44px,7vw,76px);font-weight:800;letter-spacing:-.5px}
+.hero h1 .q{color:var(--board);display:inline-block;transform:rotate(8deg)}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:34em;line-height:1.5;margin:10px 0 0}
+.parade{display:flex;gap:6px;margin-top:22px;flex-wrap:wrap}
+.parade svg{width:62px;height:auto;background:var(--card);border-radius:12px;border:2px solid var(--line)}
+.modes{display:grid;gap:14px}
+.mode{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:20px;display:grid;gap:12px}
+.mode h2{font-size:26px}
+.mode p{margin:0;color:var(--muted);line-height:1.45}
+.mode ol{margin:0;padding-left:20px;color:var(--muted);line-height:1.5}
+.coderow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.coderow label{font-weight:800}
+#codeInput{font-family:var(--display);font-size:28px;font-weight:800;width:5.2em;text-align:center;letter-spacing:4px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:4px 8px;font-variant-numeric:tabular-nums}
+.src{font-size:13px;color:var(--muted);margin:14px 0 0}
+.credit{font-size:14px;color:var(--muted);margin:6px 0 0;padding-top:10px;border-top:2px dashed var(--line);max-width:34em}
+.credit b{color:var(--ink);font-family:var(--display);font-size:16px}
+
+/* ---------- jeu ---------- */
+.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.topbar h1{font-size:28px}
+.topbar .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px}
+.pill b{font-family:var(--display);font-size:18px;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.game{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:980px){.game{grid-template-columns:1fr}}
+.board{background:var(--board);border-radius:22px;padding:12px;box-shadow:inset 0 -6px 0 var(--board-deep);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+@media (max-width:560px){.board{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:9px}}
+.boardbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:10px 4px 0}
+.boardnote{color:var(--muted);font-size:14px;margin:0;min-width:0;flex:1 1 220px}
+.card{border:0;padding:0;background:none;display:block;width:100%}
+.card .inner{position:relative;transform-origin:50% 50%}
+.card .face{background:var(--card);border:2px solid rgba(0,0,0,.12);display:flex;flex-direction:column;border-radius:12px;overflow:hidden}
+.card .face svg{display:block;width:100%;height:auto}
+.card .name{background:var(--plate);color:#1d2340;font-family:var(--display);font-weight:700;font-size:15px;padding:2px 0 1px;text-align:center;border-top:2px solid rgba(0,0,0,.08)}
+/* dos de la carte : simple motif, le prénom en petit en bas */
+.card .back{position:absolute;inset:0;display:none;border-radius:12px;overflow:hidden;background:repeating-linear-gradient(135deg,var(--board-deep) 0 10px,#1a2f68 10px 20px);border:2px solid rgba(255,255,255,.18);flex-direction:column;justify-content:flex-end}
+.card .back span{display:block;text-align:center;font-family:var(--display);font-weight:700;font-size:13px;color:rgba(255,255,255,.6);padding:2px 0 3px;background:rgba(0,0,0,.18)}
+.card.flipped .face{visibility:hidden}
+.card.flipped .back{display:flex}
+.board.guessing .card:not(.flipped) .face{outline:3px dashed var(--accent);outline-offset:-3px}
+@media (prefers-reduced-motion:reduce){.card .inner{transition:none}}
+
+.side{display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px)}
+@media (max-width:980px){.side{position:static}}
+.box{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:10px}
+.box h3{font-size:19px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 11px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.chip i{font-style:normal;font-weight:600;opacity:.6}
+.sw{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,.35);display:inline-block}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{flex:1 1 auto;border:2px solid var(--line);background:var(--chip);border-radius:12px;padding:8px 6px;font-weight:800;font-size:14px}
+.tab.on{background:var(--board);border-color:var(--board);color:#fff}
+.sentence{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.2;background:var(--paper);border-radius:14px;padding:12px 14px;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sentence.empty{color:var(--muted);font-family:var(--body);font-size:15px;font-weight:600}
+.sentence mark{background:none;color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:4px;text-underline-offset:3px}
+.hint{font-size:14px;color:var(--muted);margin:0;line-height:1.4}
+.hint b{color:var(--ink)}
+.speak{flex:none;border:0;background:var(--accent);color:var(--accent-ink);width:42px;height:42px;border-radius:50%;font-size:19px;display:grid;place-items:center}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1 1 auto}
+.bubble{border-radius:16px;padding:12px 14px;font-family:var(--display);font-weight:700;font-size:21px;line-height:1.2}
+.bubble.cpu{background:var(--board);color:#fff}
+.bubble.yes{background:color-mix(in srgb,var(--yes) 18%,var(--panel));border:2px solid var(--yes)}
+.bubble.no{background:color-mix(in srgb,var(--no) 14%,var(--panel));border:2px solid var(--no)}
+.fb{font-size:15px;line-height:1.4;margin:0}
+.fb.ok{color:var(--yes);font-weight:800}
+.fb.bad{color:var(--no);font-weight:800}
+.answers{display:grid;grid-template-columns:1fr;gap:8px}
+.answers .btn{font-family:var(--display);font-size:18px;padding:10px;text-align:left}
+.answers .btn.wrong{opacity:1;text-decoration:line-through;color:var(--no);border-color:var(--no);background:color-mix(in srgb,var(--no) 10%,var(--panel))}
+.secret{display:flex;gap:12px;align-items:center}
+.zoom{position:fixed;inset:0;z-index:60;background:rgba(10,14,32,.75);display:grid;place-items:center;padding:16px;cursor:zoom-out;animation:zin .2s ease-out}
+.zoom .zcard{width:min(80vw,30vh);background:var(--card);border-radius:20px;border:4px solid var(--accent);overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.zoom .zcard svg{display:block;width:100%;height:auto}
+.zoom .zcard .name{background:var(--plate);color:#1d2340;text-align:center;font-family:var(--display);font-weight:800;font-size:26px}
+.zoom p{color:#fff;font-weight:700;margin:12px 0 0;text-align:center}
+@keyframes zin{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.zoom{animation:none}}
+.secret .mini{width:84px;flex:none;padding:0;cursor:zoom-in;border-radius:12px;overflow:hidden;background:var(--card);border:2px solid var(--line);position:relative}
+.secret .mini svg{display:block;width:100%;height:auto}
+.secret .mini.hide::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;background:repeating-linear-gradient(135deg,var(--board-deep) 0 8px,#1a2f68 8px 16px);color:var(--accent);font-family:var(--display);font-size:36px;font-weight:800}
+.secret p{margin:0;color:var(--muted);font-size:14px;line-height:1.4}
+.secret strong{font-family:var(--display);font-size:22px;color:var(--ink);display:block}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+.log li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;line-height:1.35}
+.log .who{font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:999px;background:var(--chip);margin-top:1px}
+.log .who.cpu{background:var(--board);color:#fff}
+.log em{font-style:normal;font-weight:800}
+.count{font-family:var(--display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.stats{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.stats div{display:grid;gap:2px}
+.turn{font-family:var(--display);font-weight:800;font-size:20px;display:flex;align-items:center;gap:10px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--yes);box-shadow:0 0 0 4px color-mix(in srgb,var(--yes) 25%,transparent)}
+.dot.cpu{background:var(--board);box-shadow:0 0 0 4px color-mix(in srgb,var(--board) 30%,transparent)}
+.phr{display:grid;gap:4px;font-size:15px;margin:0;padding:0;list-style:none}
+.phr li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:4px 0}
+.phr li span:last-child{color:var(--muted);flex:none}
+
+/* ---------- fenêtres ---------- */
+.overlay{position:fixed;inset:0;background:rgba(10,14,32,.55);display:grid;place-items:center;padding:16px;z-index:50}
+.modal{background:var(--panel);border-radius:22px;padding:22px;max-width:520px;width:100%;max-height:calc(100% - 20px);overflow:auto;display:grid;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal h2{font-size:28px}
+.modal p{margin:0;line-height:1.5;color:var(--muted)}
+.modal .big{width:min(190px,55%);margin:0 auto;background:var(--card);border-radius:16px;border:3px solid var(--line);overflow:hidden}
+.modal .big svg{display:block;width:100%;height:auto}
+.modal .big .name{background:var(--plate);color:#1d2340;text-align:center;font-family:var(--display);font-weight:800;font-size:22px}
+.duo{display:flex;gap:14px;justify-content:center}
+.duo .big{width:150px;margin:0}
+.duo figure{margin:0;display:grid;gap:6px;justify-items:center;font-weight:800;font-size:13px;color:var(--muted)}
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 18px}
+.gloss h3{grid-column:1/-1;font-size:20px;margin-top:8px}
+.gloss .note{grid-column:1/-1;font-size:14px;color:var(--muted);margin:0}
+.gloss div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:5px 0;font-size:15px}
+.gloss div span:first-child{font-weight:800}
+.gloss div span:last-child{color:var(--muted);text-align:right}
+.tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:var(--tag);color:var(--muted);border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:2px}
+.modal.wide{max-width:780px}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+"use strict";
+const NB=' '; // espace insécable avant ? ! : et dans « »
+const Q=t=>`«${NB}${t}${NB}»`;
+// ---------------- vocabulaire (Découvertes 2, Unité 1, Atelier B) ----------------
+// formes : [m. sg., f. sg., m. pl., f. pl.]
+const COLORS={
+  rouge:{hex:'#d8473b',f:['rouge','rouge','rouges','rouges'],de:'rot'},
+  bleu:{hex:'#3b6fc6',f:['bleu','bleue','bleus','bleues'],de:'blau'},
+  vert:{hex:'#3f9a59',f:['vert','verte','verts','vertes'],de:'grün'},
+  jaune:{hex:'#f1c232',f:['jaune','jaune','jaunes','jaunes'],de:'gelb'},
+  noir:{hex:'#2d2d33',f:['noir','noire','noirs','noires'],de:'schwarz'},
+  blanc:{hex:'#f7f7f3',f:['blanc','blanche','blancs','blanches'],de:'weiß'},
+  gris:{hex:'#9a9ca3',f:['gris','grise','gris','grises'],de:'grau'},
+  orange:{hex:'#ef8b31',f:['orange','orange','orange','orange'],de:'orange'},
+  marron:{hex:'#7d4f2e',f:['marron','marron','marron','marron'],de:'braun'}
+};
+const CK=Object.keys(COLORS);
+const HAIR={brun:{hex:'#7a4a2a',f:'bruns'},blond:{hex:'#ecc15e',f:'blonds'},roux:{hex:'#cf5a26',f:'roux'},noir:{hex:'#26222a',f:'noirs'}};
+const LEN={long:'longs',court:'courts'};
+const EYES={bleu:{hex:'#3d7fd1',f:'bleus'},vert:{hex:'#3f9a59',f:'verts'},marron:{hex:'#6b4126',f:'marron'}};
+const ITEMS={
+  'casquette':{g:'f',de:'Mütze, Kappe',slot:'head',extra:true},
+  'lunettes':{g:'f',pl:true,de:'Brille',slot:'glasses'},
+  't-shirt':{g:'m',de:'T-Shirt',slot:'top'},
+  'chemise':{g:'f',de:'Hemd',slot:'top'},
+  'chemisier':{g:'m',de:'Bluse',slot:'top'},
+  'pull':{g:'m',de:'Pulli',slot:'top'},
+  'sweat-shirt':{g:'m',de:'Sweatshirt',slot:'top',extra:true},
+  'veste':{g:'f',de:'Jacke',slot:'top'},
+  'anorak':{g:'m',de:'Anorak',slot:'top'},
+  'robe':{g:'f',de:'Kleid',slot:'top'},
+  'pantalon':{g:'m',de:'Hose',slot:'bottom'},
+  'pantalon baggy':{g:'m',de:'weite Hose, Baggy',slot:'bottom',extra:true},
+  'jean':{g:'m',de:'Jeans',slot:'bottom'},
+  'jupe':{g:'f',de:'Rock',slot:'bottom'},
+  'short':{g:'m',de:'Shorts, kurze Hose',slot:'bottom',extra:true},
+  'chaussettes':{g:'f',pl:true,de:'Socken',slot:'socks',extra:true},
+  'chaussures':{g:'f',pl:true,de:'Schuhe',slot:'shoes'}
+};
+const NAMES_M=['Hugo','Lucas','Théo','Nathan','Louis','Jules','Tom','Hakim','Malik','Enzo','Léo','Paul','Noah','Gabriel','Yanis','Adam'];
+const NAMES_F=['Lola','Zoé','Léa','Chloé','Manon','Camille','Inès','Ada','Emma','Jade','Louise','Alice','Sarah','Lina','Clara','Yasmine'];
+const SKIN=['#f7d6b8','#eab88d','#cf9567','#a06842','#6e452b'];
+const INK='#2a2633';
+
+const adj=(color,item)=>COLORS[color].f[(ITEMS[item].pl?2:0)+(ITEMS[item].g==='f'?1:0)];
+const art=item=>ITEMS[item].pl?'des':ITEMS[item].g==='f'?'une':'un';
+const deArt=item=>/^[aeiouhéè]/i.test(item)?"d'":'de ';
+
+// ---------------- hasard reproductible ----------------
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),16777619)}return h>>>0}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pick=(r,a)=>a[Math.floor(r()*a.length)];
+function shuffle(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const rep=(v,n)=>Array(n).fill(v);
+const bag=(r,spec)=>shuffle(r,spec.flatMap(([v,n])=>rep(v,n)));
+
+// Répartition équilibrée : chaque trait apparaît sur un nombre fixe de cartes,
+// chaque couleur revient à peu près aussi souvent que les autres.
+function generate(code){
+  const r=mulberry(hashStr('qec-'+code));
+  const deck=(()=>{let d=[];return(avoid)=>{if(!d.length)d=shuffle(r,CK);let i=d.findIndex(c=>!avoid||!avoid.includes(c));if(i<0){d=d.concat(shuffle(r,CK));i=d.findIndex(c=>!avoid.includes(c))}return d.splice(i,1)[0]}})();
+  const people=[];
+  for(const g of ['m','f']){
+    const names=shuffle(r,g==='m'?NAMES_M:NAMES_F).slice(0,12);
+    const tops=g==='m'?bag(r,[['t-shirt',2],['chemise',2],['pull',2],['sweat-shirt',2],['veste',2],['anorak',2]])
+                      :bag(r,[['robe',2],['chemisier',2],['t-shirt',2],['pull',2],['sweat-shirt',2],['veste',1],['anorak',1]]);
+    const bottoms=g==='m'?bag(r,[['pantalon',3],['pantalon baggy',3],['jean',3],['short',3]])
+                         :bag(r,[['jupe',3],['jean',2],['pantalon',2],['short',2],['pantalon baggy',1]]);
+    const lens=g==='m'?bag(r,[['long',4],['court',8]]):bag(r,[['long',8],['court',4]]);
+    const glasses=bag(r,[[true,3],[false,9]]),caps=bag(r,[[true,3],[false,9]]);
+    let bi=0;
+    for(let i=0;i<12;i++){
+      const topT=tops[i];
+      people.push({name:names[i],g,len:lens[i],topT,bottomT:topT==='robe'?null:bottoms[bi++],glasses:glasses[i],cap:caps[i]});
+    }
+  }
+  const hairs=bag(r,[['brun',7],['noir',7],['blond',6],['roux',4]]);
+  const eyes=bag(r,[['marron',9],['bleu',8],['vert',7]]);
+  const bare=people.filter(p=>!p.bottomT||p.bottomT==='jupe'||p.bottomT==='short');
+  const sockSet=new Set(shuffle(r,bare).slice(0,Math.min(6,bare.length)));
+  const seen=new Set();
+  const out=people.map((p,i)=>{
+    const top={type:p.topT,color:deck()};
+    let bottom=null;
+    if(p.bottomT){bottom={type:p.bottomT,color:p.bottomT==='jean'?pick(r,['bleu','bleu','bleu','noir','gris']):deck([top.color])}}
+    const c={name:p.name,g:p.g,skin:pick(r,SKIN),hair:{len:p.len,color:hairs[i]},eyes:eyes[i],
+      glasses:p.glasses?{type:'lunettes',color:deck()}:null,head:p.cap?{type:'casquette',color:deck([top.color])}:null,
+      top,bottom,socks:sockSet.has(p)?{type:'chaussettes',color:deck(bottom?[bottom.color]:[top.color])}:null,
+      shoes:{type:'chaussures',color:deck()},shoeStyle:r()<.6?'basket':'classic'};
+    let s=sig(c),k=0;while(seen.has(s)&&k<20){c.shoes.color=deck();s=sig(c);k++}
+    seen.add(s);return c;
+  });
+  return shuffle(r,out).map((c,i)=>(c.id=i,c));
+}
+function sig(c){return JSON.stringify([c.g,c.hair,c.eyes,c.glasses,c.head,c.top,c.bottom,c.socks,c.shoes])}
+
+// ---------------- dessin ----------------
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const f=v=>Math.max(0,Math.min(255,Math.round(amt<0?v*(1+amt):v+(255-v)*amt)));return'#'+((1<<24)+(f(r)<<16)+(f(g)<<8)+f(b)).toString(16).slice(1)}
+const ST=`stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"`;
+function limb(x1,y1,x2,y2,w,col){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${INK}" stroke-width="${w+2.2}" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`}
+function shoe(x,dir,style,col){
+  const heel=x-dir*6,toe=x+dir*8;
+  if(style==='classic')return `<path d="M${heel},139 L${heel},130 Q${heel},128 ${x},128 Q${x+dir*4},129 ${toe-dir*1},133 Q${toe+dir*1},135 ${toe},139 Z" fill="${col}" ${ST}/><path d="M${heel},139 L${toe},139" stroke="${INK}" stroke-width="2.2"/>`;
+  return `<path d="M${heel},138 L${heel},129 Q${heel},126.5 ${x},126.5 L${x+dir*3},127.5 Q${toe},131 ${toe},135 L${toe},138 Z" fill="${col}" ${ST}/><rect x="${Math.min(heel,toe)-.5}" y="136.5" width="${Math.abs(toe-heel)+1}" height="3.2" rx="1.4" fill="#f4f4f1" ${ST}/>`;
+}
+function figure(c){
+  const s=c.skin,hc=HAIR[c.hair.color].hex,top=c.top,tc=COLORS[top.color].hex;
+  let o='';
+  if(c.hair.len==='long')o+=`<path d="M36.5,29 Q33,46 33,60 Q41,63 50,62 Q59,63 67,60 Q67,46 63.5,29 Z" fill="${hc}" ${ST}/>`;
+  // jambes, chaussettes, bas
+  const b=c.bottom;
+  const bareLegs=!b||b.type==='jupe'||b.type==='short';
+  if(bareLegs){o+=limb(44,96,44,132,6.5,s)+limb(56,96,56,132,6.5,s)}
+  if(c.socks){const k=COLORS[c.socks.color].hex;for(const x of [44,56])o+=limb(x,119,x,131,7.2,k)+`<path d="M${x-3.6},121.5 L${x+3.6},121.5" stroke="${shade(k,-.3)}" stroke-width="1.1"/>`}
+  if(b){
+    const bc=b.type==='jean'?({bleu:'#46679e',noir:'#33343c',gris:'#80838d'}[b.color]):COLORS[b.color].hex;
+    if(b.type==='pantalon'||b.type==='jean'){o+=limb(44,92,44,134,11,bc)+limb(56,92,56,134,11,bc)+`<path d="M36,85 L64,85 L65,99 L35,99 Z" fill="${bc}" ${ST}/>`;
+      if(b.type==='jean')o+=`<path d="M50,90 L50,99 M38,89 Q41,93 45,89 M62,89 Q59,93 55,89" stroke="#d4a64a" stroke-width=".8" fill="none"/><path d="M44,100 L44,133 M56,100 L56,133" stroke="#d4a64a" stroke-width=".7" stroke-dasharray="1.6 1.4"/>`;
+      else o+=`<path d="M44,100 L44,133 M56,100 L56,133" stroke="${shade(bc,-.25)}" stroke-width=".8"/>`}
+    else if(b.type==='pantalon baggy'){
+      o+=`<path d="M34,95 L50.5,95 L50.5,135.5 L32,135.5 Q31.5,115 34,95 Z" fill="${bc}" ${ST}/><path d="M49.5,95 L66,95 Q68.5,115 68,135.5 L49.5,135.5 Z" fill="${bc}" ${ST}/><path d="M35,85 L65,85 L66.5,100 L33.5,100 Z" fill="${bc}" ${ST}/>`;
+      o+=`<path d="M38,108 Q41,111 37,116 M45,118 Q42,122 46,127 M62,108 Q59,111 63,116 M55,118 Q58,122 54,127" fill="none" stroke="${shade(bc,-.3)}" stroke-width=".9"/><path d="M33,87.5 L67,87.5" stroke="${shade(bc,-.3)}" stroke-width="1.4"/>`;
+    }
+    else if(b.type==='short'){o+=limb(44,92,44,105,11.5,bc)+limb(56,92,56,105,11.5,bc)+`<path d="M36,85 L64,85 L65,99 L35,99 Z" fill="${bc}" ${ST}/>`}
+    else if(b.type==='jupe'){o+=`<path d="M37,85 L63,85 L69,114 Q50,117 31,114 Z" fill="${bc}" ${ST}/><path d="M44,90 L41,114 M56,90 L59,114" stroke="${shade(bc,-.25)}" stroke-width=".9"/>`}
+  }
+  const sc=COLORS[c.shoes.color].hex;
+  o+=shoe(44,-1,c.shoeStyle,sc)+shoe(56,1,c.shoeStyle,sc);
+  // bras
+  const arms=[[37,55,33.5,71.5,30,88],[63,55,66.5,71.5,70,88]];
+  for(const [sx,sy,ex,ey,hx,hy] of arms){
+    if(top.type==='robe'){o+=limb(sx,sy,hx,hy,6,s)}
+    else if(top.type==='t-shirt'){o+=limb(ex,ey,hx,hy,6,s)+limb(sx,sy,ex,ey,9.5,tc)}
+    else{
+      const w=top.type==='anorak'?11:9;o+=limb(sx,sy,hx,hy,w,tc);
+      if(top.type==='pull'||top.type==='sweat-shirt'||top.type==='anorak')o+=limb(hx+(sx<50?.7:-.7),hy-4,hx,hy-2.2,w,shade(tc,-.18));
+      if(top.type==='chemise'||top.type==='chemisier')o+=limb(hx+(sx<50?.5:-.5),hy-3,hx,hy-2,9,shade(tc,.3));
+      if(top.type==='anorak')o+=`<path d="M${(sx+ex)/2-4},${(sy+ey)/2} l8,0 M${(ex+hx)/2-4},${(ey+hy)/2} l8,0" stroke="${shade(tc,-.3)}" stroke-width=".9"/>`;
+    }
+    o+=`<circle cx="${hx}" cy="${hy+1}" r="3.7" fill="${s}" ${ST}/>`;
+  }
+  if(top.type==='sweat-shirt')o+=`<ellipse cx="50" cy="49" rx="13.5" ry="5.5" fill="${shade(tc,-.2)}" ${ST}/>`;
+  o+=`<rect x="45.5" y="38" width="9" height="14" fill="${s}" ${ST}/>`;
+  // buste
+  if(top.type==='robe'){o+=`<path d="M39,50 L61,50 Q65.5,51 65.5,56 L62.5,86 L70,116 Q50,120 30,116 L37.5,86 L34.5,56 Q34.5,51 39,50 Z" fill="${tc}" ${ST}/><path d="M44.5,50 Q50,57 55.5,50" fill="${s}" ${ST}/><path d="M37.5,86 L62.5,86" stroke="${shade(tc,-.25)}" stroke-width="1.2"/>`}
+  else{
+    const wide=top.type==='anorak';
+    o+=wide?`<path d="M38,49 L62,49 Q67.5,50 67.5,56 L65.5,93 L34.5,93 L32.5,56 Q32.5,50 38,49 Z" fill="${tc}" ${ST}/>`:`<path d="M39,50 L61,50 Q66,51 66,56 L64,91 L36,91 L34,56 Q34,51 39,50 Z" fill="${tc}" ${ST}/>`;
+    const d=shade(tc,-.2),l=shade(tc,.3);
+    if(top.type==='t-shirt')o+=`<path d="M45,50 Q50,55.5 55,50" fill="${s}" ${ST}/>`;
+    // chemise : col pointu, boutons, poche
+    if(top.type==='chemise')o+=`<path d="M44,49 L50,55 L47.5,59 L42,51.5 Z" fill="${l}" ${ST}/><path d="M56,49 L50,55 L52.5,59 L58,51.5 Z" fill="${l}" ${ST}/><path d="M50,55 L50,91" stroke="${d}" stroke-width=".8"/>`+[62,70,78,86].map(y=>`<circle cx="51.3" cy="${y}" r=".9" fill="${INK}"/>`).join('')+`<path d="M54.5,63 L60,63 L60,69 L54.5,69 Z" fill="none" stroke="${d}" stroke-width=".9"/>`;
+    // chemisier : col rond et nœud
+    if(top.type==='chemisier')o+=`<path d="M45,50 Q50,54 55,50" fill="${s}" ${ST}/><path d="M50,54 Q43,59 41.5,51 Q46,52 50,54 Z" fill="${l}" ${ST}/><path d="M50,54 Q57,59 58.5,51 Q54,52 50,54 Z" fill="${l}" ${ST}/><path d="M50,56 L46.5,54 L46.5,58.5 Z M50,56 L53.5,54 L53.5,58.5 Z" fill="${d}" ${ST}/><circle cx="50" cy="56.2" r="1.1" fill="${d}" ${ST}/>`+[64,71,78].map(y=>`<circle cx="50" cy="${y}" r=".9" fill="${INK}"/>`).join('');
+    if(top.type==='sweat-shirt')o+=`<path d="M41,75 L59,75 L61.5,89 L38.5,89 Z" fill="none" stroke="${d}" stroke-width="1.2"/><path d="M47,52 L46,63 M53,52 L54,63" stroke="#f3f0e6" stroke-width="1.1" stroke-linecap="round"/><path d="M36,86.5 L64,86.5" stroke="${d}" stroke-width="1.5"/>`;
+    if(top.type==='pull')o+=`<path d="M36,85.5 L64,85.5 L64,91 L36,91 Z" fill="${d}" ${ST}/><path d="M44.5,50 Q50,56 55.5,50" fill="none" stroke="${d}" stroke-width="2.4"/>`+[39,42,45,48,51,54,57,60].map(x=>`<path d="M${x},86 L${x},90.5" stroke="${shade(tc,-.38)}" stroke-width=".6"/>`).join('')+`<path d="M40,62 l4,4 l4,-4 l4,4 l4,-4 l4,4" fill="none" stroke="${l}" stroke-width="1.2"/>`;
+    if(top.type==='veste')o+=`<path d="M46,50 L54,50 L54,91 L46,91 Z" fill="${top.color==='blanc'?'#d9dbe2':'#f4f2ec'}" ${ST}/><path d="M46,50 L43,64 L46,68 M54,50 L57,64 L54,68" fill="none" stroke="${INK}" stroke-width="1.1"/><circle cx="41" cy="80" r=".9" fill="${INK}"/><circle cx="59" cy="80" r=".9" fill="${INK}"/>`;
+    if(top.type==='anorak')o+=[62,72,82].map(y=>`<path d="M33.5,${y} Q50,${y+2.5} 66.5,${y}" fill="none" stroke="${shade(tc,-.28)}" stroke-width="1"/>`).join('')+`<path d="M50,52 L50,93" stroke="${shade(tc,-.4)}" stroke-width="1.3"/><path d="M41,45 L59,45 L60.5,53 Q50,56 39.5,53 Z" fill="${d}" ${ST}/>`;
+  }
+  // tête
+  o+=`<circle cx="37.5" cy="32" r="3" fill="${s}" ${ST}/><circle cx="62.5" cy="32" r="3" fill="${s}" ${ST}/><circle cx="50" cy="31" r="13" fill="${s}" ${ST}/>`;
+  const ec=EYES[c.eyes].hex;
+  for(const x of [45.2,54.8])o+=`<circle cx="${x}" cy="30" r="2.5" fill="#fff" stroke="${INK}" stroke-width=".7"/><circle cx="${x}" cy="30.2" r="1.6" fill="${ec}"/><circle cx="${x}" cy="30.2" r=".7" fill="${INK}"/>`;
+  o+=`<circle cx="42" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/><circle cx="58" cy="35.5" r="2" fill="#f08a8a" opacity=".35"/><path d="M46.5,37.5 Q50,40.5 53.5,37.5" fill="none" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/>`;
+  // lunettes : monture fine, contour sombre très mince pour les couleurs claires
+  if(c.glasses){const g=COLORS[c.glasses.color].hex;
+    o+=`<g fill="none" stroke-linecap="round"><g stroke="${INK}" stroke-width="1.7"><circle cx="45.2" cy="30" r="3.8"/><circle cx="54.8" cy="30" r="3.8"/><path d="M49,29.4 Q50,28.6 51,29.4 M41.4,29.5 L37.8,28.6 M58.6,29.5 L62.2,28.6"/></g><g stroke="${g}" stroke-width="1"><circle cx="45.2" cy="30" r="3.8"/><circle cx="54.8" cy="30" r="3.8"/><path d="M49,29.4 Q50,28.6 51,29.4 M41.4,29.5 L37.8,28.6 M58.6,29.5 L62.2,28.6"/></g></g><circle cx="45.2" cy="30" r="3.3" fill="#fff" fill-opacity=".15"/><circle cx="54.8" cy="30" r="3.3" fill="#fff" fill-opacity=".15"/>`}
+  if(c.hair.len==='court')o+=`<path d="M37.2,31 Q36,17 50,17 Q64,17 62.8,31 Q61,23.5 53,22.5 Q47,25.5 41,24 Q38.5,27 37.2,31 Z" fill="${hc}" ${ST}/>`;
+  else o+=`<path d="M37.2,32 Q35.5,17 50,17 Q64.5,17 62.8,32 Q62,24 56,21.5 Q50,25 44,21.5 Q38.2,24 37.2,32 Z" fill="${hc}" ${ST}/>`;
+  if(c.head){
+    const k=COLORS[c.head.color].hex,dk=shade(k,-.22);
+    o+=`<path d="M37.4,26 L37.4,34 L39.6,33 L40,26 Z M62.6,26 L62.6,34 L60.4,33 L60,26 Z" fill="${hc}" ${ST}/>`;
+    o+=`<path d="M36.6,28 Q37,13.5 50,13.5 Q63,13.5 63.4,28 Z" fill="${k}" ${ST}/><path d="M50,14 L50,27" stroke="${dk}" stroke-width=".9"/><circle cx="50" cy="14" r="1.6" fill="${dk}" ${ST}/><path d="M35.5,27.5 Q50,24 64.5,27.5 Q66,31.5 50,31.8 Q34,31.5 35.5,27.5 Z" fill="${dk}" ${ST}/>`;
+  }
+  return o;
+}
+function svgFor(c){return `<svg viewBox="22 3 56 141" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${c.name}">${figure(c)}</svg>`}
+
+// ---------------- questions ----------------
+const pron=c=>c.g==='m'?'il':'elle';
+function worn(c,item){
+  const slot=ITEMS[item].slot;
+  const o=slot==='head'?c.head:slot==='glasses'?c.glasses:slot==='top'?c.top:slot==='bottom'?c.bottom:slot==='socks'?c.socks:c.shoes;
+  if(!o)return null;
+  if(item==='pantalon'&&o.type==='pantalon baggy')return o; // un baggy est aussi un pantalon
+  return o.type===item?o:null;
+}
+function evalQ(c,q){
+  switch(q.kind){
+    case'wear':{const o=worn(c,q.item);if(!o)return false;return q.color?o.color===q.color:true}
+    case'hair':return(!q.len||c.hair.len===q.len)&&(!q.color||c.hair.color===q.color);
+    case'eyes':return c.eyes===q.color;
+    case'garcon':return c.g==='m';
+    case'fille':return c.g==='f';
+    case'name':return c.id===q.id;
+  }
+}
+function obj(q,mark){
+  const m=t=>mark?`<mark>${t}</mark>`:t;
+  if(q.kind==='wear')return `${q.item}${q.color?' '+m(adj(q.color,q.item)):''}`;
+  if(q.kind==='hair')return 'les cheveux '+[q.len&&m(LEN[q.len]),q.color&&m(HAIR[q.color].f)].filter(Boolean).join(' et ');
+  if(q.kind==='eyes')return 'les yeux '+m(EYES[q.color].f);
+}
+function qText(q,mark){
+  switch(q.kind){
+    case'wear':return `Est-ce que ton personnage porte ${art(q.item)} ${obj(q,mark)}${NB}?`;
+    case'hair':case'eyes':return `Est-ce que ton personnage a ${obj(q,mark)}${NB}?`;
+    case'garcon':return `Est-ce que c'est un garçon${NB}?`;
+    case'fille':return `Est-ce que c'est une fille${NB}?`;
+    case'name':return `Est-ce que c'est ${q.name}${NB}?`;
+  }
+}
+// « mon personnage » au lieu de il / elle : la réponse ne révèle pas si c'est un garçon ou une fille
+const SUBJ='mon personnage';
+function answerText(q,yes){
+  const p=SUBJ;
+  switch(q.kind){
+    case'wear':return yes?`Oui, ${p} porte ${art(q.item)} ${obj(q)}.`:`Non, ${p} ne porte pas ${deArt(q.item)}${obj(q)}.`;
+    case'hair':case'eyes':return yes?`Oui, ${p} a ${obj(q)}.`:`Non, ${p} n'a pas ${obj(q)}.`;
+    case'garcon':return yes?"Oui, c'est un garçon.":"Non, c'est une fille.";
+    case'fille':return yes?"Oui, c'est une fille.":"Non, c'est un garçon.";
+    case'name':return yes?`Oui, c'est ${q.name}${NB}!`:`Non, ce n'est pas ${q.name}.`;
+  }
+}
+// réponses proposées en mode ordinateur, chacune avec son type de faute
+function answerOptions(c,q){
+  const yes=evalQ(c,q),p=SUBJ;
+  const opts=[{t:answerText(q,yes),err:null},{t:answerText(q,!yes),err:'truth'}];
+  if(q.kind==='wear'){
+    // faute de négation : « pas un / une / des » au lieu de « pas de »
+    opts.push({t:`Non, ${p} ne porte pas ${art(q.item)} ${obj(q)}.`,err:yes?'truth':'neg'});
+    if(q.color){const wi=(ITEMS[q.item].pl?2:0)+(ITEMS[q.item].g==='f'?0:1);const w=COLORS[q.color].f[wi];
+      if(w!==adj(q.color,q.item))opts.push({t:yes?`Oui, ${p} porte ${art(q.item)} ${q.item} ${w}.`:`Non, ${p} ne porte pas ${deArt(q.item)}${q.item} ${w}.`,err:'agree'})}
+  }
+  if(q.kind==='hair'||q.kind==='eyes'){
+    // avec les cheveux / les yeux, on garde « les » après la négation
+    opts.push({t:`Non, ${p} n'a pas de ${obj(q).replace(/^les /,'')}.`,err:yes?'truth':'les'});
+  }
+  const seen=new Set();
+  return shuffle(Math.random,opts.filter(o=>!seen.has(o.t)&&seen.add(o.t)).slice(0,4));
+}
+function speak(t){try{const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,''));u.lang='fr-FR';u.rate=.88;const vs=speechSynthesis.getVoices();const v=vs.find(v=>/^fr(-|_)FR/i.test(v.lang))||vs.find(v=>/^fr/i.test(v.lang));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+
+function cpuQuestion(rem){
+  const cands=[];
+  for(const item in ITEMS){cands.push({kind:'wear',item});const cs=new Set(rem.map(c=>worn(c,item)).filter(Boolean).map(o=>o.color));cs.forEach(color=>cands.push({kind:'wear',item,color}))}
+  Object.keys(LEN).forEach(len=>cands.push({kind:'hair',len}));
+  Object.keys(HAIR).forEach(color=>cands.push({kind:'hair',color}));
+  Object.keys(EYES).forEach(color=>cands.push({kind:'eyes',color}));
+  cands.push({kind:Math.random()<.5?'garcon':'fille'});
+  const n=rem.length;
+  const scored=cands.map(q=>{const y=rem.filter(c=>evalQ(c,q)).length;return{q,y,score:Math.abs(y-n/2)+Math.random()*1.2}}).filter(x=>x.y>0&&x.y<n).sort((a,b)=>a.score-b.score);
+  const top=scored.slice(0,4);
+  return top.length?top[Math.floor(Math.random()*top.length)].q:null;
+}
+
+// ---------------- état ----------------
+let S=null;
+const B={tab:'wear',item:null,color:null,len:null,hcol:null,eyes:null,who:null,showAns:false};
+function curQ(){
+  if(B.tab==='wear')return B.item?{kind:'wear',item:B.item,color:B.color}:null;
+  if(B.tab==='have'){if(B.eyes)return{kind:'eyes',color:B.eyes};return(B.len||B.hcol)?{kind:'hair',len:B.len,color:B.hcol}:null}
+  return B.who?{kind:B.who}:null;
+}
+function resetBuilder(){Object.assign(B,{item:null,color:null,len:null,hcol:null,eyes:null,who:null,showAns:false})}
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+// ---------------- accueil ----------------
+function renderStart(){
+  S=null;closeModal();
+  const demo=generate('d'+Math.floor(Math.random()*999)).slice(0,7);
+  const code=String(1000+Math.floor(Math.random()*9000));
+  app.innerHTML=`<div class="start">
+    <section class="hero">
+      <h1>Qui est-<span class="q">ce${NB}?</span></h1>
+      <p class="lead">Le jeu de l'<b>Unité 1</b>&#8239;: les vêtements, les couleurs et le look. Pose des questions en français, retourne les cartes et trouve le personnage secret.</p>
+      <div class="parade" aria-hidden="true">${demo.map(svgFor).join('')}</div>
+      <p class="lead" style="font-size:15px;margin-top:18px">Dans le jeu, le bouton <b>Vocabulaire</b> montre tous les mots avec la traduction en allemand. Le bouton 🔊 lit la question en français.</p>
+      <p class="src">Vocabulaire${NB}: Découvertes 2, Unité 1, Atelier B (livre p.${NB}178–179).</p>
+      <p class="credit">Un jeu de <b>Jan Wilsker-Wiesen</b> · créé avec Claude</p>
+    </section>
+    <section class="modes">
+      <div class="mode">
+        <h2>À deux · 2 iPads</h2>
+        <ol>
+          <li>Tapez <b>le même code</b> sur les deux iPads. Vous avez alors les mêmes 24 personnages.</li>
+          <li>Chacun et chacune reçoit un personnage secret.</li>
+          <li>Posez vos questions <b>à voix haute</b>, chacun à son tour${NB}: ${Q(`Est-ce que ton personnage porte une jupe verte${NB}?`)} Réponse${NB}: ${Q('Non, mon personnage ne porte pas de jupe verte.')}<br>Dites toujours <b>mon personnage</b>, pas <i>il</i> ou <i>elle</i>. Comme ça, on ne sait pas si c'est un garçon ou une fille.</li>
+          <li>Touche une carte pour la retourner. Le premier ou la première qui trouve le personnage gagne${NB}: ${Q(`Est-ce que c'est Lola${NB}?`)}</li>
+        </ol>
+        <div class="coderow"><label for="codeInput">Code du jeu</label><input id="codeInput" inputmode="numeric" maxlength="6" value="${code}" autocomplete="off"><button class="btn primary" id="goDuo">Commencer</button></div>
+      </div>
+      <div class="mode">
+        <h2>Contre l'ordinateur</h2>
+        <p>Pour t'entraîner seul ou seule. Tu construis tes questions avec des mots. L'ordinateur te pose aussi des questions et tu choisis la bonne réponse. Attention à <i>ne … pas de</i> et aux couleurs${NB}!</p>
+        <div class="row"><button class="btn blue" id="goCpu">Commencer l'entraînement</button></div>
+      </div>
+    </section>
+  </div>`;
+  document.getElementById('goDuo').onclick=()=>{const v=(document.getElementById('codeInput').value||'').trim()||code;startGame('duo',v)};
+  document.getElementById('goCpu').onclick=()=>startGame('cpu',String(Math.floor(Math.random()*1e6)));
+}
+
+// ---------------- jeu ----------------
+function startGame(mode,code){
+  const chars=generate(code);
+  const mine=chars[Math.floor(Math.random()*24)];
+  S={mode,code,chars,secret:mine,flipped:new Set(),hideSecret:true,tidy:false,guessing:false,log:[],asked:0,
+     cpu:mode==='cpu'?{secret:chars[Math.floor(Math.random()*24)],rem:chars.slice()}:null,
+     turn:'you',phase:'ask',lastAns:null,cpuQ:null,cpuOpts:null,cpuFb:null};
+  resetBuilder();renderGame();
+  modal(`<h2>Ton personnage secret</h2>
+    <div class="big">${svgFor(mine)}<div class="name">${esc(mine.name)}</div></div>
+    <p>${mode==='duo'?`Retiens bien ton personnage et ne montre pas ton iPad à ton ou ta partenaire. Tu peux revoir ta carte à droite.`:`L'ordinateur cherche ton personnage. Toi, tu cherches le personnage de l'ordinateur. Tu commences${NB}!`}</p>
+    <div class="row"><button class="btn primary" data-act="close">C'est parti${NB}!</button></div>`);
+}
+function renderGame(){
+  app.innerHTML=`<div class="topbar">
+      <h1>Qui est-ce${NB}?</h1>
+      <div class="meta">
+        ${S.mode==='duo'?`<span class="pill">Code du jeu${NB}: <b>${esc(S.code)}</b></span>`:`<span class="pill">Entraînement contre l'ordinateur</span>`}
+        <button class="btn small" data-act="gloss">Vocabulaire</button>
+        <button class="btn small" data-act="quit">Nouvelle partie</button>
+      </div>
+    </div>
+    <div class="game">
+      <div><div class="board" id="board"></div><div class="boardbar"><p class="boardnote" id="boardnote"></p><button class="btn small" id="tidyBtn" data-act="tidy"></button></div></div>
+      <aside class="side" id="side"></aside>
+    </div>`;
+  document.getElementById('board').innerHTML=S.chars.map(c=>`<button class="card" data-card="${c.id}" aria-label="${esc(c.name)}"><div class="inner"><div class="face">${svgFor(c)}<div class="name">${esc(c.name)}</div></div><div class="back"><span>${esc(c.name)}</span></div></div></button>`).join('');
+  syncBoard();renderSide();
+}
+const calm=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Les cartes restantes glissent vers leur nouvelle place (technique FLIP)
+function slide(mutate){
+  const els=[...document.querySelectorAll('.card')];
+  const first=new Map(els.map(e=>[e,e.getBoundingClientRect()]));
+  mutate();
+  if(calm()||!Element.prototype.animate)return;
+  els.forEach(e=>{if(e.hidden)return;const f=first.get(e),l=e.getBoundingClientRect();
+    if(!f.width){e.animate([{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],{duration:350,easing:'ease-out'});return}
+    const dx=f.left-l.left,dy=f.top-l.top;
+    if(dx||dy)e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:450,easing:'cubic-bezier(.3,.7,.3,1)'})});
+}
+// La carte se retourne comme une vraie carte : elle se replie, puis on voit l'autre côté.
+function flipCard(el,on){
+  const inner=el.querySelector('.inner');
+  if(calm()||!inner.animate){el.classList.toggle('flipped',on);return}
+  inner.getAnimations().forEach(a=>a.cancel());
+  inner.animate([{transform:'scaleY(1)'},{transform:'scaleY(0.02)'}],{duration:140,easing:'ease-in'}).onfinish=()=>{
+    el.classList.toggle('flipped',on);
+    inner.animate([{transform:'scaleY(0.02)'},{transform:'scaleY(1)'}],{duration:180,easing:'ease-out'});
+  };
+}
+function hideLater(el,id){
+  setTimeout(()=>{
+    if(!S||!S.tidy||!S.flipped.has(id)||el.hidden)return;
+    const go=()=>slide(()=>{el.hidden=true});
+    if(calm()||!el.animate)return go();
+    el.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.7)'}],{duration:220,easing:'ease-in'}).onfinish=go;
+  },calm()?0:520);
+}
+function syncBoard(){
+  document.querySelectorAll('.card').forEach(el=>{const f=S.flipped.has(+el.dataset.card);el.classList.toggle('flipped',f);el.hidden=S.tidy&&f});
+  const b=document.getElementById('board');if(b)b.classList.toggle('guessing',S.guessing);
+  const n=document.getElementById('boardnote');
+  if(n)n.textContent=S.guessing?'Touche le personnage que tu veux deviner.':S.tidy?'Touche une carte pour la retourner. Les autres cartes se rapprochent.':'Touche une carte pour la retourner. Touche encore une fois pour la remettre.';
+  const t=document.getElementById('tidyBtn');
+  if(t){t.textContent=S.tidy?`Montrer les cartes retournées (${S.flipped.size})`:'Ranger les cartes retournées';t.disabled=S.tidy&&!S.flipped.size}
+}
+const standing=()=>24-S.flipped.size;
+
+function agreeHint(q){
+  if(!q||q.kind!=='wear'||!q.color)return'';
+  const it=ITEMS[q.item],a=adj(q.color,q.item),base=COLORS[q.color].f[0];
+  if(q.color==='orange'||q.color==='marron')return `<p class="hint"><b>${q.color}</b> ne change jamais.</p>`;
+  const genre=`${it.g==='f'?'féminin':'masculin'} ${it.pl?'pluriel':'singulier'}`;
+  if(a===base)return `<p class="hint"><b>${art(q.item)} ${q.item}</b>${NB}: ${genre}. La couleur reste <b>${a}</b>.</p>`;
+  return `<p class="hint"><b>${art(q.item)} ${q.item}</b>${NB}: ${genre}. <b>${base}</b> devient <b>${a}</b>.</p>`;
+}
+function builderHTML(){
+  const tabs=[['wear','porte …'],['have','a les cheveux / les yeux …'],['is',"c'est …"]];
+  let h=`<div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${B.tab===k?'on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</div>`;
+  if(B.tab==='wear'){
+    h+=`<div class="label">Le vêtement</div><div class="chips">${Object.keys(ITEMS).map(i=>`<button class="chip ${B.item===i?'on':''}" data-act="item" data-v="${i}"><i>${art(i)}</i>${i}</button>`).join('')}</div>
+    <div class="label">La couleur (si tu veux)</div><div class="chips">${CK.map(c=>`<button class="chip ${B.color===c?'on':''}" data-act="color" data-v="${c}"><span class="sw" style="background:${COLORS[c].hex}"></span>${B.item?adj(c,B.item):c}</button>`).join('')}</div>`;
+  }else if(B.tab==='have'){
+    h+=`<div class="label">Les cheveux${NB}: longs ou courts${NB}?</div><div class="chips">${Object.keys(LEN).map(k=>`<button class="chip ${B.len===k?'on':''}" data-act="len" data-v="${k}">${LEN[k]}</button>`).join('')}</div>
+    <div class="label">Les cheveux${NB}: la couleur</div><div class="chips">${Object.keys(HAIR).map(k=>`<button class="chip ${B.hcol===k?'on':''}" data-act="hcol" data-v="${k}"><span class="sw" style="background:${HAIR[k].hex}"></span>${HAIR[k].f}</button>`).join('')}</div>
+    <div class="label">ou${NB}: les yeux</div><div class="chips">${Object.keys(EYES).map(k=>`<button class="chip ${B.eyes===k?'on':''}" data-act="eyes" data-v="${k}"><span class="sw" style="background:${EYES[k].hex}"></span>${EYES[k].f}</button>`).join('')}</div>`;
+  }else{
+    h+=`<div class="chips"><button class="chip ${B.who==='garcon'?'on':''}" data-act="who" data-v="garcon">un garçon</button><button class="chip ${B.who==='fille'?'on':''}" data-act="who" data-v="fille">une fille</button></div>`;
+  }
+  const q=curQ();
+  h+=q?`<div class="sentence"><span>${qText(q,true)}</span><button class="speak" data-act="say" aria-label="Écouter">🔊</button></div>${agreeHint(q)}`:`<div class="sentence empty">Choisis des mots${NB}: ta question apparaît ici.</div>`;
+  return h;
+}
+function logHTML(){
+  if(!S.log.length)return'';
+  return `<div class="box"><h3>Les questions</h3><ul class="log">${S.log.slice(-6).reverse().map(l=>`<li><span class="who ${l.who==='cpu'?'cpu':''}">${l.who==='cpu'?'PC':'Toi'}</span><span>${esc(l.q)} <em>${esc(l.a)}</em></span></li>`).join('')}</ul></div>`;
+}
+function secretBox(title){
+  const c=S.secret;
+  return `<div class="box"><h3>${title}<button class="btn small" data-act="toggleSecret">${S.hideSecret?'Voir':'Cacher'}</button></h3>
+    <div class="secret"><button class="mini ${S.hideSecret?'hide':''}" data-act="zoom" aria-label="Agrandir mon personnage">${svgFor(c)}</button>
+    <p>${S.hideSecret?`Caché${NB}: personne ne regarde${NB}!`:`<strong>${esc(c.name)}</strong>Dans ta réponse, tu dis${NB}: <b>mon personnage</b>`}<br>Touche la carte pour l'agrandir.</p></div></div>`;
+}
+function renderSide(){
+  const side=document.getElementById('side');if(!side)return;
+  if(S.mode==='duo'){
+    const q=curQ();let ans='';
+    if(q&&B.showAns){const y=evalQ(S.secret,q);ans=`<div class="bubble ${y?'yes':'no'}">${esc(answerText(q,y))}</div>`}
+    side.innerHTML=`${secretBox('Mon personnage')}
+      <div class="box"><h3>Pose une question</h3>${builderHTML()}
+        ${q?`<button class="btn small" data-act="ans">${B.showAns?'Cacher la réponse':"Qu'est-ce que je réponds pour mon personnage${NB}?"}</button>${ans}`:''}
+      </div>
+      <div class="box"><h3>Répondre et deviner</h3>
+        <ul class="phr">
+          <li><span>Oui, mon personnage porte un pull vert.</span><span>porte …${NB}?</span></li>
+          <li><span>Non, mon personnage ne porte <b>pas de</b> jupe.</span><span>porte …${NB}?</span></li>
+          <li><span>Oui, mon personnage a les cheveux longs.</span><span>a …${NB}?</span></li>
+          <li><span>Non, mon personnage <b>n'a pas</b> les yeux bleus.</span><span>a …${NB}?</span></li>
+          <li><span>Est-ce que c'est Lola${NB}? Oui${NB}!</span><span>deviner</span></li>
+        </ul>
+        <div class="stats"><div><span class="label">Cartes encore debout</span><span class="count">${standing()}</span></div></div>
+        <button class="btn" data-act="reveal">Montrer mon personnage</button>
+      </div>`;
+    return;
+  }
+  let main='';
+  if(S.turn==='over'){
+    main=`<div class="box"><h3>La partie est finie.</h3><button class="btn primary" data-act="again">Encore une partie</button></div>`;
+  }else if(S.turn==='you'){
+    if(S.phase==='ask'){
+      const q=curQ();
+      main=`<div class="box"><div class="turn"><span class="dot"></span>C'est ton tour</div>${builderHTML()}
+        <div class="row"><button class="btn primary" data-act="ask" ${q?'':'disabled'}>Poser la question</button><button class="btn" data-act="guess">${S.guessing?'Annuler':`Deviner${NB}: c'est …${NB}?`}</button></div></div>`;
+    }else{
+      const a=S.lastAns;
+      main=`<div class="box"><div class="turn"><span class="dot"></span>C'est ton tour</div>
+        <p class="fb">Toi${NB}: <b>${esc(a.q)}</b></p>
+        <div class="bubble ${a.yes?'yes':'no'}">${esc(a.a)}</div>
+        <p class="fb">Maintenant, retourne les personnages qui ne vont pas.</p>
+        <div class="row"><button class="btn blue" data-act="endTurn">J'ai fini → à l'ordinateur</button></div></div>`;
+    }
+  }else{
+    const q=S.cpuQ;
+    if(!S.cpuFb){
+      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>L'ordinateur demande</div>
+        <div class="bubble cpu" style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span>${esc(qText(q))}</span><button class="speak" data-act="sayCpu" aria-label="Écouter">🔊</button></div>
+        ${S.cpuTry?`<p class="fb bad">Ce n'est pas la bonne réponse. Essaie encore une fois${NB}!</p><p class="fb">${S.cpuTry}</p>`:`<p class="fb">Regarde ton personnage et choisis la bonne réponse${NB}:</p>`}
+        <div class="answers">${S.cpuOpts.map((o,i)=>`<button class="btn ${o.tried?'wrong':''}" data-act="cpuAns" data-v="${i}" ${o.tried?'disabled':''}>${o.tried?'✗ ':''}${esc(o.t)}</button>`).join('')}</div></div>`;
+    }else{
+      const f=S.cpuFb;
+      main=`<div class="box"><div class="turn"><span class="dot cpu"></span>L'ordinateur demande</div>
+        <div class="bubble cpu">${esc(qText(q))}</div>
+        <div class="bubble ${f.yes?'yes':'no'}">✓ ${esc(f.correct)}</div>
+        ${f.tries?`<p class="fb ok">Maintenant, c'est juste${NB}! Bravo, tu as corrigé ta réponse.</p>`:`<p class="fb ok">Très bien${NB}! C'est la bonne réponse du premier coup.</p>`}
+        <div class="row"><button class="btn primary" data-act="toYou">Continuer → c'est ton tour</button></div></div>`;
+    }
+  }
+  side.innerHTML=`${main}
+    <div class="box"><div class="stats">
+      <div><span class="label">Tes cartes debout</span><span class="count">${standing()}</span></div>
+      <div><span class="label">Il reste à l'ordinateur</span><span class="count">${S.cpu.rem.length}</span></div>
+    </div></div>
+    ${secretBox("Ton personnage (l'ordinateur cherche)")}
+    ${logHTML()}`;
+}
+const HINTS={
+  truth:c=>`Regarde bien${NB}: cette réponse ne va pas avec ${esc(c.name)}.`,
+  les:()=>`Avec <b>les cheveux</b> et <b>les yeux</b>, on garde <b>les</b>${NB}: <i>Mon personnage n'a pas les yeux bleus.</i>`,
+  neg:()=>`Après <b>ne … pas</b>, <b>un / une / des</b> devient <b>de</b> (<b>d'</b> devant une voyelle)${NB}: <i>Mon personnage ne porte pas de pull.</i>`,
+  agree:()=>`La couleur s'accorde avec le vêtement${NB}: <i>une jupe verte, des chaussettes noires</i>.`
+};
+function cpuStart(){
+  const rem=S.cpu.rem;
+  if(rem.length<=2){const g=rem[Math.floor(Math.random()*rem.length)];S.cpuQ={kind:'name',id:g.id,name:g.name}}
+  else S.cpuQ=cpuQuestion(rem)||{kind:'name',id:rem[0].id,name:rem[0].name};
+  S.cpuOpts=answerOptions(S.secret,S.cpuQ);S.cpuFb=null;S.cpuTry='';S.cpuTries=0;S.turn='cpu';renderSide();
+}
+// Une mauvaise réponse est barrée, l'élève lit l'explication et choisit encore une fois.
+function cpuAnswered(i){
+  const q=S.cpuQ,yes=evalQ(S.secret,q),correct=answerText(q,yes),o=S.cpuOpts[i];
+  if(o.err){o.tried=true;S.cpuTries++;S.cpuTry=HINTS[o.err](S.secret);renderSide();return}
+  S.cpuFb={correct,yes,tries:S.cpuTries};S.cpuTry='';
+  S.log.push({who:'cpu',q:qText(q),a:correct});
+  if(q.kind==='name'&&yes){S.turn='over';renderSide();setTimeout(()=>endModal(false),500);return}
+  S.cpu.rem=S.cpu.rem.filter(c=>evalQ(c,q)===yes);
+  renderSide();
+}
+function endModal(youWin){
+  const you=S.secret,cpu=S.cpu.secret;
+  modal(`<h2>${youWin?`Bravo, tu as gagné${NB}! 🎉`:`L'ordinateur a gagné.`}</h2>
+    <p>${youWin?`Tu as trouvé ${esc(cpu.name)} avec ${S.asked} question${S.asked>1?'s':''}.`:`L'ordinateur a trouvé ${esc(you.name)}. Son personnage, c'était ${esc(cpu.name)}.`}</p>
+    <div class="duo"><figure><div class="big">${svgFor(you)}<div class="name">${esc(you.name)}</div></div>ton personnage</figure><figure><div class="big">${svgFor(cpu)}<div class="name">${esc(cpu.name)}</div></div>le personnage du PC</figure></div>
+    <div class="row"><button class="btn primary" data-act="again">Encore une partie</button><button class="btn" data-act="close">Voir le plateau</button></div>`);
+}
+function guessCard(id){
+  const c=S.chars[id];
+  modal(`<h2>Est-ce que c'est ${esc(c.name)}${NB}?</h2><div class="big">${svgFor(c)}<div class="name">${esc(c.name)}</div></div>
+    <p>Si ce n'est pas le bon personnage, la carte se retourne et c'est le tour de l'ordinateur.</p>
+    <div class="row"><button class="btn primary" data-act="confirmGuess" data-v="${id}">Oui, je devine${NB}!</button><button class="btn" data-act="close">Annuler</button></div>`);
+}
+
+// ---------------- fenêtres ----------------
+function modal(html,wide){
+  closeModal();
+  const o=document.createElement('div');o.className='overlay';o.id='overlay';
+  o.innerHTML=`<div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)closeModal()});
+  document.body.appendChild(o);
+  const b=o.querySelector('.btn.primary,.btn');if(b)b.focus();
+}
+function closeModal(){const o=document.getElementById('overlay');if(o)o.remove()}
+function glossary(){
+  const row=(fr,de)=>`<div><span>${fr}</span><span>${de}</span></div>`;
+  const cf=k=>{const f=COLORS[k].f;return f[0]===f[3]?f[0]+(k==='orange'||k==='marron'?'<span class="tag">inv.</span>':''):f[0]===f[1]?`${f[0]} / ${f[2]}`:`${f[0]} / ${f[1]}`};
+  modal(`<h2>Vocabulaire · Unité 1</h2><div class="gloss">
+    <h3>Les vêtements</h3>${Object.entries(ITEMS).map(([k,v])=>row(`${art(k)} ${k}${v.extra?'<span class="tag">en plus</span>':''}`,v.de)).join('')}
+    <p class="note"><b>en plus</b>${NB}: ces mots sont en bleu dans le livre (p.${NB}179) ou dans le texte (p.${NB}18). Un pantalon baggy est aussi un pantalon.</p>
+    <h3>Les couleurs</h3>${CK.map(k=>row(cf(k),COLORS[k].de)).join('')}
+    <p class="note">La couleur vient <b>après</b> le nom et s'accorde${NB}: un pull vert, une jupe verte, des chaussettes vertes. <b>orange</b> et <b>marron</b> ne changent jamais.</p>
+    <h3>Décrire quelqu'un</h3>${row('porter qc','etwas tragen')+row('un personnage','eine Figur, eine Person')+row('un garçon / une fille','ein Junge / ein Mädchen')+row('les cheveux longs / courts','lange / kurze Haare')+row('les cheveux bruns, blonds, roux, noirs','braune, blonde, rote, schwarze Haare')+row('les yeux bleus, verts, marron','blaue, grüne, braune Augen')+row('des lunettes (f., pl.)','eine Brille')}
+    <h3>Phrases utiles</h3>${row(`Est-ce que ton personnage porte une veste${NB}?`,'Trägt deine Person eine Jacke?')+row(`Est-ce que ton personnage a les yeux bleus${NB}?`,'Hat deine Person blaue Augen?')+row('Oui, mon personnage porte une veste.','Ja, meine Person trägt eine Jacke.')+row('Non, mon personnage ne porte pas de veste.','Nein, meine Person trägt keine Jacke.')+row("Non, mon personnage n'a pas les cheveux longs.",'Nein, meine Person hat keine langen Haare.')+row(`Est-ce que c'est Lola${NB}?`,'Ist es Lola?')}
+  </div><div class="row"><button class="btn primary" data-act="close">Fermer</button></div>`,true);
+}
+
+// ---------------- événements ----------------
+function setB(patch){Object.assign(B,patch,{showAns:false});renderSide()}
+document.addEventListener('click',e=>{
+  const card=e.target.closest('[data-card]');
+  if(card&&S){
+    const id=+card.dataset.card;
+    if(S.guessing){if(!S.flipped.has(id))guessCard(id);return}
+    S.flipped.has(id)?S.flipped.delete(id):S.flipped.add(id);
+    flipCard(card,S.flipped.has(id));
+    if(S.flipped.has(id))hideLater(card,id);
+    const c=document.querySelector('.side .count');if(c)c.textContent=standing();
+    const t=document.getElementById('tidyBtn');if(t&&S.tidy){t.textContent=`Montrer les cartes retournées (${S.flipped.size})`;t.disabled=!S.flipped.size}
+    return;
+  }
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,v=t.dataset.v;
+  switch(a){
+    case'close':closeModal();break;
+    case'gloss':glossary();break;
+    case'quit':modal(`<h2>Nouvelle partie${NB}?</h2><p>La partie en cours s'arrête.</p><div class="row"><button class="btn primary" data-act="again">Oui, nouvelle partie</button><button class="btn" data-act="close">Continuer à jouer</button></div>`);break;
+    case'again':renderStart();break;
+    case'tab':setB({tab:v});break;
+    case'item':setB({item:B.item===v?null:v});break;
+    case'color':setB({color:B.color===v?null:v});break;
+    case'len':setB({len:B.len===v?null:v,eyes:null});break;
+    case'hcol':setB({hcol:B.hcol===v?null:v,eyes:null});break;
+    case'eyes':setB({eyes:B.eyes===v?null:v,len:null,hcol:null});break;
+    case'who':setB({who:B.who===v?null:v});break;
+    case'say':{const q=curQ();if(q)speak(qText(q));break}
+    case'sayCpu':if(S.cpuQ)speak(qText(S.cpuQ));break;
+    case'ans':B.showAns=!B.showAns;renderSide();break;
+    case'toggleSecret':S.hideSecret=!S.hideSecret;renderSide();break;
+    case'zoom':{const z=document.createElement('div');z.className='zoom';z.id='zoom';
+      z.innerHTML=`<div><div class="zcard">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><p>Touche pour fermer.</p></div>`;
+      z.onclick=()=>z.remove();document.body.appendChild(z);break}
+    case'reveal':modal(`<h2>Mon personnage</h2><div class="big">${svgFor(S.secret)}<div class="name">${esc(S.secret.name)}</div></div><div class="row"><button class="btn primary" data-act="close">Fermer</button></div>`);break;
+    case'ask':{const q=curQ();if(!q)return;const c=S.cpu.secret,yes=evalQ(c,q);S.asked++;
+      S.lastAns={q:qText(q),yes,a:answerText(q,yes)};S.log.push({who:'you',q:S.lastAns.q,a:S.lastAns.a});
+      S.phase='answered';S.guessing=false;syncBoard();renderSide();speak(S.lastAns.a);break}
+    case'endTurn':S.phase='ask';resetBuilder();cpuStart();break;
+    case'tidy':slide(()=>{S.tidy=!S.tidy;syncBoard()});break;
+    case'guess':S.guessing=!S.guessing;syncBoard();renderSide();break;
+    case'confirmGuess':{closeModal();const id=+v,c=S.chars[id];S.asked++;S.guessing=false;
+      const right=c.id===S.cpu.secret.id;S.log.push({who:'you',q:`Est-ce que c'est ${c.name}${NB}?`,a:right?`Oui, c'est ${c.name}${NB}!`:`Non, ce n'est pas ${c.name}.`});
+      if(right){S.turn='over';syncBoard();renderSide();endModal(true)}
+      else{S.flipped.add(id);syncBoard();S.phase='ask';resetBuilder();cpuStart();
+        modal(`<h2>Non, ce n'est pas ${esc(c.name)}.</h2><p>Maintenant, c'est le tour de l'ordinateur.</p><div class="row"><button class="btn primary" data-act="close">OK</button></div>`)}
+      break}
+    case'cpuAns':cpuAnswered(+v);break;
+    case'toYou':S.turn='you';S.phase='ask';S.cpuFb=null;renderSide();break;
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();const z=document.getElementById('zoom');if(z)z.remove()}});
+try{speechSynthesis.getVoices()}catch(e){}
+renderStart();
+})();
+</script>
+<script>
+// Fonctionne aussi sans Internet après la première visite
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
