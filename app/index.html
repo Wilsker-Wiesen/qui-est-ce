@@ -1,26 +1,9 @@
-<!doctype html>
-<html lang="fr">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Qui est-ce ?</title>
-<meta name="author" content="Jan Wilsker-Wiesen">
-<meta name="description" content="Jeu de devinettes pour l'Unité 1 de Découvertes 2 : les vêtements, les couleurs et le look. Un jeu de Jan Wilsker-Wiesen, créé avec Claude.">
-<meta name="theme-color" content="#2d4c9e">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Qui est-ce ?">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
 <style>
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{font-size:16px}
-img{max-width:100%}
 /* Layout: a blue game-board tray of flip cards on the left, a question-builder console on the right; stacks on portrait/phone. */
 :root{
   --paper:#eef1f8; --panel:#ffffff; --ink:#1d2340; --muted:#5b6487; --line:#d6dbea;
@@ -181,8 +164,6 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:var(--tag);color:var(--muted);border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:2px}
 .modal.wide{max-width:780px}
 </style>
-</head>
-<body>
 
 <div class="wrap" id="app"></div>
 
@@ -938,9 +919,3 @@ try{speechSynthesis.getVoices()}catch(e){}
 renderStart();
 })();
 </script>
-<script>
-// Fonctionne aussi sans Internet après la première visite
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
-</script>
-</body>
-</html>
