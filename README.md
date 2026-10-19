@@ -27,6 +27,10 @@ Die 24 Personen werden aus dem Spielcode erzeugt, aber nicht zufällig verteilt:
 
 Anleitungen, Knöpfe und Hinweise lassen sich per Flagge zwischen Französisch und Deutsch umschalten (auf der Startseite pro Kasten, im Spiel für alles). Fragen und Antworten bleiben immer französisch.
 
+## App-Symbol
+
+„Pop-Art“: vier ganz verschiedene Personen aus dem Spiel auf vier Bonbonfarben (Gelb, Türkis, Rosa, Orange). Zwei Mädchen, zwei Jungen, vier Hauttöne, Brille und Mütze, damit man sofort sieht, worum es im Spiel geht. Ausgewählt am 19.10.2026 aus 15 Entwürfen (`docs/brand/symbol-werkstatt.html`). Vorlage: `docs/brand/app-symbol.svg` und `docs/brand/app-symbol-1024.png`, daraus die Größen in `app/icons/`.
+
 ## Aufbau
 
 | Pfad | Inhalt |
